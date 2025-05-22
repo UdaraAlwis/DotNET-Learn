@@ -21,7 +21,7 @@ namespace Movies.Application.Repositories
                 return Task.FromResult(false);
         }
 
-        public Task<List<Movie>?> GetAllAsync(Guid id)
+        public Task<List<Movie>?> GetAllAsync()
         {
             return Task.FromResult(_movies ?? null);
         }

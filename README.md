@@ -1,2 +1,2 @@
 # DotNET-Learn
-Continuous learning on DotNET goodies,,,
+Continuous learning on DotNET goodies...
