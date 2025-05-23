@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Movies.Contracts\Movies.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\dev\DotNET-Learn\rest-api-course\1.GettingStarted\Movies.Api\.editorconfig" />
+  </ItemGroup>
+
 </Project>

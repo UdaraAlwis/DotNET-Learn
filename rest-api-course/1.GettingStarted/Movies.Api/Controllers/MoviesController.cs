@@ -6,11 +6,11 @@ using Movies.Contracts.Requests;
 namespace Movies.Api.Controllers
 {
     [ApiController]
-    public class MovieController : ControllerBase
+    public class MoviesController : ControllerBase
     {
         private readonly IMovieRepository _movieRepository;
 
-        public MovieController(IMovieRepository movieRepository)
+        public MoviesController(IMovieRepository movieRepository)
         {
             this._movieRepository = movieRepository;
         }
@@ -20,7 +20,7 @@ namespace Movies.Api.Controllers
         {
             var movieToCreate = request.ToMovie();
             await _movieRepository.CreateMovieAsync(movieToCreate);
-            return CreatedAtAction(nameof(Get), new { id = movieToCreate.Id }, movieToCreate);
+            return CreatedAtAction(nameof(Get), new { idOrSlug = movieToCreate.Id }, movieToCreate);
         }
 
         [HttpGet(ApiEndpoints.Movies.Get)]
