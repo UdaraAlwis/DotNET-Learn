@@ -17,6 +17,17 @@ namespace Movies.Api.Mapping
             };
         }
 
+        public static Movie ToMovie(this UpdateMovieRequest updateMovieRequest, Guid id)
+        {
+            return new Movie 
+            { 
+                Id = id,
+                Title = updateMovieRequest.Title,
+                YearOfRelease = updateMovieRequest.YearOfRelease,
+                Genres = updateMovieRequest.Genres.ToList(),
+            };
+        }
+
         public static MovieResponse ToMovieResponse(this Movie movie)
         {
             return new MovieResponse
@@ -24,6 +35,7 @@ namespace Movies.Api.Mapping
                 Id = movie.Id,
                 Title = movie.Title,
                 YearOfRelease = movie.YearOfRelease,
+                Slug = movie.Slug,
                 Genres = movie.Genres
             };
         }

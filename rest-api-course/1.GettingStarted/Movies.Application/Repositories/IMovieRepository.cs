@@ -6,6 +6,8 @@ namespace Movies.Application.Repositories
     {
         Task<Movie?> GetMovieByIdAsync(Guid id);
 
+        Task<Movie?> GetMovieBySlugAsync(string slug);
+
         Task<List<Movie>?> GetAllAsync();
 
         Task<bool> CreateMovieAsync(Movie movie);
