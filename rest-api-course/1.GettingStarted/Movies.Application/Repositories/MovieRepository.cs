@@ -1,51 +1,93 @@
-﻿using Movies.Application.Models;
+﻿using Dapper;
+using Movies.Application.Database;
+using Movies.Application.Models;
+using System.Data;
+using System.Data.Common;
 
 namespace Movies.Application.Repositories
 {
     public class MovieRepository : IMovieRepository
     {
-        private readonly List<Movie> _movies = [];
+        private readonly IDbConnectionFactory _dbConnectionFactory;
 
-        public Task<bool> CreateMovieAsync(Movie movie)
+        public MovieRepository(IDbConnectionFactory dbConnectionFactory)
         {
-            _movies.Add(movie);
-            return Task.FromResult(true);
+            this._dbConnectionFactory = dbConnectionFactory;
         }
 
-        public Task<bool> DeleteByIdAsync(Guid id)
+        public async Task<bool> CreateMovieAsync(Movie movie)
         {
-            var removedCount = _movies.RemoveAll(x => x.Id == id);
-            if (removedCount > 0)
-                return Task.FromResult(true);
-            else
-                return Task.FromResult(false);
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var transaction = connection.BeginTransaction();
+
+            var result = await connection.ExecuteAsync(
+                "INSERT INTO movies (id, title, yearofrelease, slug) " +
+                "VALUES (@Id, @Title, @YearOfRelease, @Slug)",
+                movie);
+
+            if (result > 0)
+            {
+                foreach (var genre in movie.Genres)
+                {
+                    await connection.ExecuteAsync(
+                    "INSERT INTO genres (movieId, name) " +
+                    "VALUES (@MovieId, @Name)",
+                    new
+                    {
+                        MovieId = movie.Id,
+                        Name = genre
+                    });
+                }
+            }
+
+            transaction.Commit();
+
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<List<Movie>?> GetAllAsync()
         {
-            return Task.FromResult(_movies ?? null);
+            throw new NotImplementedException();
         }
 
-        public Task<Movie?> GetMovieByIdAsync(Guid id)
+        public async Task<Movie?> GetMovieByIdAsync(Guid id)
         {
-            return Task.FromResult(_movies.FirstOrDefault(x => x.Id == id));
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var movie = await connection.QuerySingleOrDefaultAsync<Movie>(new CommandDefinition(
+                "SELECT * FROM movies WHERE id = @id", new { id }));
+
+            if (movie == null)
+                return null;
+
+            var genres = await connection.QueryAsync<string>(new CommandDefinition(
+                "SELECT name from genres where movieid = @movieId", new { movie.Id }));
+
+            foreach (var item in genres)
+            {
+                movie.Genres.Add(item);
+            }
+
+            return movie;
         }
 
         public Task<Movie?> GetMovieBySlugAsync(string slug)
         {
-            return Task.FromResult(_movies.FirstOrDefault(x => x.Slug == slug));
+            throw new NotImplementedException();
         }
 
         public Task<bool> UpdateMovieAsync(Movie movie)
         {
-            var movieIndex = _movies.FindIndex(x => x.Id == movie.Id);
-            if(movieIndex != -1)
-            {
-                _movies[movieIndex] = movie;
-                return Task.FromResult(true);
-            }
-            else
-                return Task.FromResult(false);
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ExistsByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
