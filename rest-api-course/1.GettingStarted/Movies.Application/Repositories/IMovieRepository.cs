@@ -17,6 +17,5 @@ namespace Movies.Application.Repositories
         Task<bool> DeleteByIdAsync(Guid id);
 
         Task<bool> ExistsByIdAsync(Guid id);
-
     }
 }
