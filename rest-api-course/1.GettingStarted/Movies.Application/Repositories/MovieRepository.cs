@@ -122,7 +122,7 @@ namespace Movies.Application.Repositories
                 return null;
 
             var genres = await connectionFactory.QueryAsync<string>(new CommandDefinition(
-                "SELECT name from genres where movieid = @movieId", new { movie.Id }));
+                "SELECT name from genres where movieid = @movieId", new { movieId = movie.Id }));
 
             foreach (var item in genres)
             {
