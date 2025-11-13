@@ -19,15 +19,15 @@ namespace Movies.Api.Controllers
         public async Task<IActionResult> Create([FromBody]CreateMovieRequest request)
         {
             var movieToCreate = request.ToMovie();
-            await _movieRepository.CreateMovieAsync(movieToCreate);
+            await _movieRepository.CreateAsync(movieToCreate);
             return CreatedAtAction(nameof(Get), new { idOrSlug = movieToCreate.Id }, movieToCreate);
         }
 
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug)
         {
-            var movie = Guid.TryParse(idOrSlug, out var id) ? await _movieRepository.GetMovieByIdAsync(id) 
-                : await _movieRepository.GetMovieBySlugAsync(idOrSlug);
+            var movie = Guid.TryParse(idOrSlug, out var id) ? await _movieRepository.GetByIdAsync(id) 
+                : await _movieRepository.GetBySlugAsync(idOrSlug);
             if(movie is null)
             {
                 return NotFound();
@@ -48,7 +48,7 @@ namespace Movies.Api.Controllers
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateMovieRequest request)
         {
             var movieToUpdate = request.ToMovie(id);
-            var result = await _movieRepository.UpdateMovieAsync(movieToUpdate);
+            var result = await _movieRepository.UpdateAsync(movieToUpdate);
             if (!result)
                 return NotFound();
 

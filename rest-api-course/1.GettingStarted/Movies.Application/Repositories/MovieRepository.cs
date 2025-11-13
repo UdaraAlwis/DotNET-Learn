@@ -13,28 +13,31 @@ namespace Movies.Application.Repositories
             this._dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<bool> CreateMovieAsync(Movie movie)
+        public async Task<bool> CreateAsync(Movie movie)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             using var transaction = connection.BeginTransaction();
 
-            var result = await connection.ExecuteAsync(
-                "INSERT INTO movies (id, title, yearofrelease, slug) " +
-                "VALUES (@Id, @Title, @YearOfRelease, @Slug)",
-                movie);
+            var result = await connection.ExecuteAsync(new CommandDefinition(
+                """
+                INSERT INTO movies (id, title, yearofrelease, slug) 
+                VALUES (@Id, @Title, @YearOfRelease, @Slug)
+                """, movie));
 
             if (result > 0)
             {
                 foreach (var genre in movie.Genres)
                 {
-                    await connection.ExecuteAsync(
-                    "INSERT INTO genres (movieId, name) " +
-                    "VALUES (@MovieId, @Name)",
+                    await connection.ExecuteAsync(new CommandDefinition(
+                    """
+                    INSERT INTO genres (movieId, name) 
+                    VALUES (@MovieId, @Name)
+                    """,
                     new
                     {
                         MovieId = movie.Id,
                         Name = genre
-                    });
+                    }));
                 }
             }
 
@@ -45,35 +48,71 @@ namespace Movies.Application.Repositories
 
         public async Task<bool> DeleteByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var transaction = connection.BeginTransaction();
+
+            await connection.ExecuteAsync(new CommandDefinition("""
+                DELETE FROM genres WHERE movieid = @MovieId
+                """,
+                new { MovieId = id }));
+
+            var result = await connection.ExecuteAsync(new CommandDefinition("""
+                DELETE FROM movies WHERE id = @MovieId
+                """,
+                new { MovieId = id }));
+
+            transaction.Commit();
+
+            return result > 0;
         }
 
-        public Task<List<Movie>?> GetAllAsync()
+        public async Task<List<Movie>?> GetAllAsync()
         {
-            throw new NotImplementedException();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var results = await connection.QueryAsync(new CommandDefinition(
+                """
+                SELECT m.*, STRING_AGG(g.name, ',') as genres
+                FROM movies m
+                left join genres g ON m.id = g.movieid
+                GROUP BY id
+                """
+                ));
+
+            return results.Select(x => new Movie()
+            {
+                Id = x.id,
+                Title = x.title,
+                YearOfRelease = x.yearofrelease,
+                Genres = Enumerable.ToList(x.genres.Split(',')),
+            }).ToList();
         }
 
-        public async Task<Movie?> GetMovieByIdAsync(Guid id)
+        public async Task<Movie?> GetByIdAsync(Guid id)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var movie = await connection.QuerySingleOrDefaultAsync<Movie>(new CommandDefinition(
-                "SELECT * FROM movies WHERE id = @id", new { id }));
+                """
+                SELECT * FROM movies WHERE id = @id
+                """, new { id }));
+                
 
             if (movie == null)
                 return null;
 
             var genres = await connection.QueryAsync<string>(new CommandDefinition(
-                "SELECT name from genres where movieid = @movieId", new { movie.Id }));
+                """
+                SELECT name FROM genres WHERE movieid = @movieId
+                """, new { movie.Id }));
 
-            foreach (var item in genres)
+            foreach (var genre in genres)
             {
-                movie.Genres.Add(item);
+                movie.Genres.Add(genre);
             }
 
             return movie;
         }
 
-        public async Task<Movie?> GetMovieBySlugAsync(string slug)
+        public async Task<Movie?> GetBySlugAsync(string slug)
         {
             var connectionFactory = await _dbConnectionFactory.CreateConnectionAsync();
             var movie = await connectionFactory.QuerySingleOrDefaultAsync<Movie>(new CommandDefinition(
@@ -93,39 +132,46 @@ namespace Movies.Application.Repositories
             return movie;
         }
 
-        public async Task<bool> UpdateMovieAsync(Movie movie)
+        public async Task<bool> UpdateAsync(Movie movie)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             using var transaction = connection.BeginTransaction();
 
-            var result = await connection.ExecuteAsync(
-                "INSERT INTO movies (id, title, yearofrelease, slug) " +
-                "VALUES (@Id, @Title, @YearOfRelease, @Slug)",
-                movie);
+            await connection.ExecuteAsync(new CommandDefinition("""
+                DELETE FROM genres WHERE movieid = @MovieId
+                """,
+                new { MovieId = movie.Id }));
 
-            if (result > 0)
+            foreach (var genre in movie.Genres)
             {
-                foreach (var genre in movie.Genres)
-                {
-                    await connection.ExecuteAsync(
-                    "INSERT INTO genres (movieId, name) " +
-                    "VALUES (@MovieId, @Name)",
+                await connection.ExecuteAsync(new CommandDefinition("""
+                    INSERT INTO genres (movieid, name) 
+                    VALUES (@MovieId, @Name)
+                    """,
                     new
                     {
                         MovieId = movie.Id,
                         Name = genre
-                    });
-                }
+                    }));
             }
+
+            var result = await connection.ExecuteAsync(new CommandDefinition("""
+                UPDATE movies 
+                SET title = @Title, yearofrelease = @YearOfRelease, slug = @Slug
+                WHERE id = @Id
+                """, movie));
 
             transaction.Commit();
 
             return result > 0;
         }
 
-        public Task<bool> ExistsByIdAsync(Guid id)
+        public async Task<bool> ExistsByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.ExecuteScalarAsync<bool>(new CommandDefinition("""
+                SELECT COUNT(1) FROM movies WHERE id = @id
+                """, new { id }));
         }
     }
 }
