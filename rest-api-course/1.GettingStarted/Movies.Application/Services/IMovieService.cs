@@ -1,8 +1,13 @@
 ﻿using Movies.Application.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Movies.Application.Repositories
+namespace Movies.Application.Services
 {
-    public interface IMovieRepository
+    public interface IMovieService
     {
         Task<bool> CreateAsync(Movie movie);
 
@@ -12,10 +17,8 @@ namespace Movies.Application.Repositories
 
         Task<List<Movie>?> GetAllAsync();
 
-        Task<bool> UpdateAsync(Movie movie);
+        Task<Movie?> UpdateAsync(Movie movie);
 
         Task<bool> DeleteByIdAsync(Guid id);
-
-        Task<bool> ExistsByIdAsync(Guid id);
     }
 }
