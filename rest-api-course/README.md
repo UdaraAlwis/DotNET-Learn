@@ -117,3 +117,119 @@ builder.Services.AddDatabase(config["Database:ConnectionString"]!);
 var dbInitializer = app.Services.GetRequiredService<DbInitializer>();
 await dbInitializer.InitializeAsync();
 ```
+
+### Adding a Service Layer
+
+Movies.Api
+    - Controllers (will be calling the Services)
+Movies.Application
+    - Services (will be calling the Repositories)
+    - Repositories (will be calling the Database)
+
+### Adding Valiadtion
+
+Using FluentValidation.DependencyInjectionExtensions in the Movies.Application layer
+
+MovieValidator.cs
+```csharp
+public class MovieValidator : AbstractValidator<Movie>
+{
+    ...
+    RuleFor(x => x.Slug)
+        .MustAsync(ValidateSlug)
+        .WithMessage("This movie already exists in the system!");
+    ...
+    private async Task<bool> ValidateSlug(Movie movie, string slug, CancellationToken cancellationToken)
+    {
+        var existingMovie = await _movieRepository.GetBySlugAsync(slug);
+
+        if (existingMovie is not null)
+        {
+            return existingMovie.Id == movie.Id;
+        }
+
+        return existingMovie is null;
+    }
+}
+...
+```
+
+Use it in the Services by calling ValidateAndThrowAsync before proceeding with the business logic
+
+```csharp
+public class MovieService : IMovieService
+{
+    ...
+    private readonly IValidator<Movie> _movieValidator;
+    ...
+    public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken)
+    {
+        await _movieValidator.ValidateAndThrowAsync(movie, cancellationToken);
+        return await _movieRepository.CreateAsync(movie, cancellationToken);
+    }
+    ...
+}
+``` 
+
+ValidationMappingMiddleware.cs to map ValidationException to HTTP 400 Bad Request
+
+```csharp
+public async Task InvokeAsync(HttpContext context)
+{
+    try
+    {
+        await _next(context);
+    }
+    catch (ValidationException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+        var validationFailureResponse = new ValidationFailureResponse 
+        {
+            Errors = ex.Errors.Select(x => new ValidationResponse 
+            {
+                PropertyName = x.PropertyName,
+                Message = x.ErrorMessage,
+            })
+        };
+
+        await context.Response.WriteAsJsonAsync(validationFailureResponse);
+    }
+}
+```
+
+
+Register the Middleware in Program.cs
+
+```csharp
+app.UseMiddleware<ValidationMappingMiddleware>();
+```
+
+### Cancallation Tokens
+
+Pass CancellationToken from the API Layer to the Application Layer to the Database Layer
+
+```csharp
+...
+[HttpPost(ApiEndpoints.Movies.Create)]
+public async Task<IActionResult> Create([FromBody]CreateMovieRequest request, 
+    CancellationToken cancellationToken)
+...
+MovieService.CreateAsync(Movie movie, CancellationToken cancellationToken)
+...
+public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
+{
+    using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+    using var transaction = connection.BeginTransaction();
+
+    var result = await connection.ExecuteAsync(new CommandDefinition(
+        """
+        INSERT INTO movies (id, title, yearofrelease, slug) 
+        VALUES (@Id, @Title, @YearOfRelease, @Slug)
+        """, movie, cancellationToken: cancellationToken));
+}
+...
+```
+
+### Authentication and Authorization with JWT
+
