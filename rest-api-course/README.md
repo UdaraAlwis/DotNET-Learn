@@ -233,3 +233,42 @@ public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationT
 
 ### Authentication and Authorization with JWT
 
+With the use of Microsoft.AspNetCore.Authentication.JwtBearer in Movies.Api layer
+
+```csharp
+builder.Services.AddAuthentication(x => 
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x => 
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+        ValidIssuer = config["Jwt:Issuer"],
+        ValidAudience = config["Jwt:Audience"],
+        ValidateIssuer = true,
+        ValidateAudience = true
+    };
+    
+});
+...
+builder.Services.AddAuthorization();
+...
+app.UseAuthentication();
+```
+
+Then in Controllers
+
+```csharp
+[Authorize]
+public class MovieController : ControllerBase
+{
+    ...
+}
+```
+
+
