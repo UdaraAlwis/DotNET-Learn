@@ -271,4 +271,25 @@ public class MovieController : ControllerBase
 }
 ```
 
+Validating claims and limiting actions
 
+```csharp
+builder.Services.AddAuthorization(x =>
+{
+    x.AddPolicy("Admin", 
+        p => p.RequireClaim("admin", "true"));
+    x.AddPolicy("Trusted",
+        p => p.RequireAssertion(c => 
+            c.User.HasClaim(claim => claim is { Type: "admin", Value: "true"}) ||
+            c.User.HasClaim(claim => claim is { Type: "trusted_member", Value: "true" })));
+});
+```
+Then in Controller or endpoint
+
+```csharp
+[Authorize(Policy = "Admin")]
+public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
+{
+    ...
+}
+```
