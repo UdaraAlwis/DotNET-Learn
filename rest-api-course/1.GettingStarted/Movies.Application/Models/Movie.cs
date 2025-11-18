@@ -8,6 +8,10 @@ namespace Movies.Application.Models
         public required string Title { get; set; }
         public int YearOfRelease { get; set; }
         public string Slug => GenerateSlug();
+
+        public float? Rating { get; set; }
+        public int? UserRating { get; set; }
+
         public required List<string> Genres { get; init; } = new List<string>();
         
         private string GenerateSlug()

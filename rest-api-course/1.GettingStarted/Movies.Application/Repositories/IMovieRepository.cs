@@ -7,11 +7,11 @@ namespace Movies.Application.Repositories
     {
         Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default);
 
-        Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Movie?> GetByIdAsync(Guid id, Guid? userId = default, CancellationToken cancellationToken = default);
 
-        Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default);
+        Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken cancellationToken = default);
 
-        Task<List<Movie>?> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<List<Movie>?> GetAllAsync(Guid? userId = default, CancellationToken cancellationToken = default);
 
         Task<bool> UpdateAsync(Movie movie, CancellationToken cancellationToken = default);
 

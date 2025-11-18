@@ -293,3 +293,15 @@ public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken c
     ...
 }
 ```
+
+Extracting UserId from Claims in Token
+
+```csharp
+var userId = context.User.Claims.SingleOrDefault(c => c.Type == "userid");
+
+if (Guid.TryParse(userId?.Value, out Guid parsedId))
+{
+    return parsedId;
+}
+```
+
