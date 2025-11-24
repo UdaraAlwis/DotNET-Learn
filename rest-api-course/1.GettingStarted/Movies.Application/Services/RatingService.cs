@@ -38,5 +38,10 @@ namespace Movies.Application.Services
 
             return await _ratingRepository.RateMovieAsync(movieId, rating, userId, cancellationToken);
         }
+
+        public async Task<bool> DeleteRatingAsync(Guid movieId, Guid userId, CancellationToken cancellationToken = default)
+        {
+            return await _ratingRepository.DeleteRatingAsync(movieId, userId, cancellationToken);
+        }
     }
 }
