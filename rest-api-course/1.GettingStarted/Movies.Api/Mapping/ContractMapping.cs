@@ -28,7 +28,7 @@ namespace Movies.Api.Mapping
             };
         }
 
-        public static MovieResponse ToMovieResponse(this Movie movie)
+        public static MovieResponse MapToResponse(this Movie movie)
         {
             return new MovieResponse
             {
@@ -42,9 +42,19 @@ namespace Movies.Api.Mapping
             };
         }
 
-        public static MoviesResponse ToMoviesResponse(this IEnumerable<Movie> movies)
+        public static MoviesResponse MapToResponse(this IEnumerable<Movie> movies)
         {
-            return new MoviesResponse { Items = movies.Select(ToMovieResponse) };
+            return new MoviesResponse { Items = movies.Select(MapToResponse) };
+        }
+
+        public static IEnumerable<MovieRatingResponse> MapToResponse(this IEnumerable<MovieRating> ratings)
+        {
+            return ratings.Select(rating => new MovieRatingResponse
+            { 
+                MovieId = rating.MovieId,
+                Slug = rating.Slug,
+                Rating = rating.Rating
+            });
         }
     }
 }

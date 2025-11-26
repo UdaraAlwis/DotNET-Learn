@@ -40,7 +40,7 @@ namespace Movies.Api.Controllers
                 return NotFound();
             }
 
-            var movieResponse = movie.ToMovieResponse();
+            var movieResponse = movie.MapToResponse();
             return Ok(movieResponse);
         }
 
@@ -48,8 +48,11 @@ namespace Movies.Api.Controllers
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
+
             var movies = await _movieService.GetAllAsync(userId, cancellationToken);
-            return Ok(movies);
+            var moviesResponse = movies?.MapToResponse();
+
+            return Ok(moviesResponse);
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
@@ -63,7 +66,7 @@ namespace Movies.Api.Controllers
             if (updatedMovie == null)
                 return NotFound();
 
-            var response = movieToUpdate.ToMovieResponse();
+            var response = movieToUpdate.MapToResponse();
             return Ok(response);
         }
 
