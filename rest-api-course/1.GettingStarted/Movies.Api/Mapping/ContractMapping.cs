@@ -56,5 +56,20 @@ namespace Movies.Api.Mapping
                 Rating = rating.Rating
             });
         }
+
+        public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest getAllMoviesRequest)
+        {
+            return new GetAllMoviesOptions
+            {
+                Title = getAllMoviesRequest.Title,
+                YearOfRelease = getAllMoviesRequest.Year,
+            };
+        }
+
+        public static GetAllMoviesOptions WithUser(this GetAllMoviesOptions options, Guid? userId)
+        {
+            options.UserId = userId;
+            return options;
+        }
     }
 }

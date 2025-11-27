@@ -1,12 +1,6 @@
 ﻿using FluentValidation;
 using Movies.Application.Models;
 using Movies.Application.Repositories;
-using Movies.Application.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Movies.Application.Validators
 {

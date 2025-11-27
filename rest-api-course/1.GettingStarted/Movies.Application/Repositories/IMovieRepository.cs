@@ -11,7 +11,7 @@ namespace Movies.Application.Repositories
 
         Task<Movie?> GetBySlugAsync(string slug, Guid? userId = default, CancellationToken cancellationToken = default);
 
-        Task<List<Movie>?> GetAllAsync(Guid? userId = default, CancellationToken cancellationToken = default);
+        Task<List<Movie>?> GetAllAsync(GetAllMoviesOptions getAllMoviesOptions, CancellationToken cancellationToken = default);
 
         Task<bool> UpdateAsync(Movie movie, CancellationToken cancellationToken = default);
 

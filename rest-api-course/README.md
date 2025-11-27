@@ -271,7 +271,7 @@ public class MovieController : ControllerBase
 }
 ```
 
-Validating claims and limiting actions
+### Validating claims and limiting actions
 
 ```csharp
 builder.Services.AddAuthorization(x =>
@@ -294,7 +294,7 @@ public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken c
 }
 ```
 
-Extracting UserId from Claims in Token
+### Extracting UserId from Claims in Token
 
 ```csharp
 var userId = context.User.Claims.SingleOrDefault(c => c.Type == "userid");
@@ -302,6 +302,34 @@ var userId = context.User.Claims.SingleOrDefault(c => c.Type == "userid");
 if (Guid.TryParse(userId?.Value, out Guid parsedId))
 {
     return parsedId;
+}
+```
+
+### Passing Query Parameters to Application Layer
+
+```csharp
+[HttpGet(ApiEndpoints.Movies.GetAll)]
+public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, 
+    CancellationToken cancellationToken)
+{
+    var userId = HttpContext.GetUserId();
+    var options = request.MapToOptions()
+                        .WithUser(userId);
+    var movies = await _movieService.GetAllAsync(options, cancellationToken);
+...
+}
+```
+
+Mapping Query Parameters DTO to Options to pass down to Application Layer 
+
+```csharp
+public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest getAllMoviesRequest)
+{
+    return new GetAllMoviesOptions
+    {
+        Title = getAllMoviesRequest.Title,
+        YearOfRelease = getAllMoviesRequest.Year,
+    };
 }
 ```
 

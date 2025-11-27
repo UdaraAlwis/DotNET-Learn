@@ -66,7 +66,7 @@ namespace Movies.Application.Repositories
             return result > 0;
         }
 
-        public async Task<List<Movie>?> GetAllAsync(Guid? userId = default, CancellationToken cancellationToken = default)
+        public async Task<List<Movie>?> GetAllAsync(GetAllMoviesOptions getAllMoviesOptions, CancellationToken cancellationToken = default)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
             var results = await connection.QueryAsync(new CommandDefinition(
@@ -80,9 +80,16 @@ namespace Movies.Application.Repositories
                 left join ratings r ON m.id = r.movieid
                 left join ratings myr ON m.id = myr.movieid
                                     and myr.userid = @userId
+                WHERE (@title IS NULL OR m.title ILIKE '%' || @title || '%')
+                AND (@yearOfRelease IS NULL OR m.yearofrelease = @yearOfRelease)
                 GROUP BY id, userrating
                 """,
-                new { userId }, cancellationToken: cancellationToken));
+                new 
+                {
+                    userId = getAllMoviesOptions.UserId, 
+                    title = getAllMoviesOptions.Title,
+                    yearOfRelease = getAllMoviesOptions.YearOfRelease
+                }, cancellationToken: cancellationToken));
 
             return results.Select(x => new Movie()
             {
