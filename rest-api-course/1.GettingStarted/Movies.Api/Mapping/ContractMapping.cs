@@ -57,12 +57,15 @@ namespace Movies.Api.Mapping
             });
         }
 
-        public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest getAllMoviesRequest)
+        public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest request)
         {
             return new GetAllMoviesOptions
             {
-                Title = getAllMoviesRequest.Title,
-                YearOfRelease = getAllMoviesRequest.Year,
+                Title = request.Title,
+                YearOfRelease = request.YearOfRelease,
+                SortField = request.SortBy?.Trim('+','-'),
+                SortOrder = request.SortBy is null ? SortOrder.Unsorted : 
+                    request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
             };
         }
 

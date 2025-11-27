@@ -66,11 +66,22 @@ namespace Movies.Application.Repositories
             return result > 0;
         }
 
-        public async Task<List<Movie>?> GetAllAsync(GetAllMoviesOptions getAllMoviesOptions, CancellationToken cancellationToken = default)
+        public async Task<List<Movie>?> GetAllAsync(GetAllMoviesOptions options, CancellationToken cancellationToken = default)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+            
+            var orderClause = string.Empty;
+            if(options.SortField is not null)
+            {
+                orderClause = $"""
+                    , m.{options.SortField}
+                    ORDER BY m.{options.SortField} 
+                    {(options.SortOrder == SortOrder.Ascending ? "ASC" : "DESC")}
+                    """;
+            }
+
             var results = await connection.QueryAsync(new CommandDefinition(
-                """
+                $"""
                 SELECT m.*, 
                        STRING_AGG(DISTINCT g.name, ',') AS genres, 
                        ROUND(AVG(r.rating), 1) AS rating, 
@@ -82,13 +93,14 @@ namespace Movies.Application.Repositories
                                     and myr.userid = @userId
                 WHERE (@title IS NULL OR m.title ILIKE '%' || @title || '%')
                 AND (@yearOfRelease IS NULL OR m.yearofrelease = @yearOfRelease)
-                GROUP BY id, userrating
+                GROUP BY id, userrating {orderClause}
                 """,
                 new 
                 {
-                    userId = getAllMoviesOptions.UserId, 
-                    title = getAllMoviesOptions.Title,
-                    yearOfRelease = getAllMoviesOptions.YearOfRelease
+                    userId = options.UserId, 
+                    title = options.Title,
+                    yearOfRelease = options.YearOfRelease,
+
                 }, cancellationToken: cancellationToken));
 
             return results.Select(x => new Movie()
