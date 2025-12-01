@@ -10,6 +10,7 @@ namespace Movies.Api.Controllers
 {
     [ApiController]
     [ApiVersion(1.0)]
+    [ApiVersion(2.0)]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -26,11 +27,12 @@ namespace Movies.Api.Controllers
         {
             var movieToCreate = request.ToMovie();
             await _movieService.CreateAsync(movieToCreate, cancellationToken);
-            return CreatedAtAction(nameof(Get), new { idOrSlug = movieToCreate.Id }, movieToCreate);
+            return CreatedAtAction(nameof(GetV2), new { idOrSlug = movieToCreate.Id }, movieToCreate);
         }
 
+        [MapToApiVersion(1.0)]
         [HttpGet(ApiEndpoints.Movies.Get)]
-        public async Task<IActionResult> Get([FromRoute] string idOrSlug,
+        public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
             CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
@@ -38,6 +40,24 @@ namespace Movies.Api.Controllers
                 await _movieService.GetByIdAsync(id, userId, cancellationToken) :
                 await _movieService.GetBySlugAsync(idOrSlug, userId, cancellationToken);
             if(movie is null)
+            {
+                return NotFound();
+            }
+
+            var movieResponse = movie.MapToResponse();
+            return Ok(movieResponse);
+        }
+
+        [MapToApiVersion(2.0)]
+        [HttpGet(ApiEndpoints.Movies.Get)]
+        public async Task<IActionResult> GetV2([FromRoute] string idOrSlug,
+         CancellationToken cancellationToken)
+        {
+            var userId = HttpContext.GetUserId();
+            var movie = Guid.TryParse(idOrSlug, out var id) ?
+                await _movieService.GetByIdAsync(id, userId, cancellationToken) :
+                await _movieService.GetBySlugAsync(idOrSlug, userId, cancellationToken);
+            if (movie is null)
             {
                 return NotFound();
             }

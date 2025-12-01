@@ -424,7 +424,7 @@ public static class ApiEndpoints
 
 Advanced Versioning with ```Asp.Versioning.Mvc``` package
 
-Program.cs
+In Program.cs with the following changes
 
 ```csharp
 builder.Services.AddApiVersioning(x =>
@@ -463,7 +463,66 @@ In client side request add the request Header,
 Accept: application/json; api-version=2.0
 ```
 
+### Swagger and Versioning
 
+Implementing Versioning with Swagger using ```Asp.Versioning.Mvc.ApiExplorer``` package
+
+```csharp
+[ApiController]
+[ApiVersion(1.0)]
+[ApiVersion(2.0)]
+public class MoviesController : ControllerBase
+{
+    ...
+    [MapToApiVersion(1.0)]
+    public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
+        CancellationToken cancellationToken)
+    {
+        ...
+    }
+
+    [MapToApiVersion(2.0)]
+    public async Task<IActionResult> GetV2([FromRoute] string idOrSlug,
+        CancellationToken cancellationToken)
+    {
+        ...
+    }
+}
+```
+
+*It is not best to maintain Multiple versions in the same Controller as Swagger can get confusing with the mapping*
+
+Set up the boilerplate code for Custom Swagger Versioning
+
+```csharp
+public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+{
+    ...
+}
+```
+
+```csharp
+public class SwaggerDefaultValues : IOperationFilter
+{
+    ...
+}
+```
+
+In Program.cs
+
+```csharp
+builder.Services.AddApiVersioning(x =>
+{
+    ...
+}).AddMvc().AddApiExplorer();
+
+builder.Services.AddControllers();
+
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
+```
+
+*It is recommended to keep 1 version per Controller*
 
 
 
