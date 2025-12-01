@@ -385,6 +385,40 @@ public async Task<IActionResult> Get([FromRoute] string idOrSlug,
 
 *HATEOAS unnecessarily bloats the response size and complexity, so it will be undone in the project!*
 
+### Versioning the API
+
+Basic Versioning with URL Segmenting
+
+```csharp
+public static class ApiEndpoints
+{
+    private const string ApiBase = "/api";
+
+    public static class V1
+    {
+        private const string VersionBase = $"{ApiBase}/v1";
+        public static class Movies
+        {
+            private const string Base = $"{VersionBase}/movies";
+
+            ...
+        }
+        ...
+    }
+
+    public static class V2
+    {
+        private const string VersionBase = $"{ApiBase}/v2";
+        public static class Movies
+        {
+            private const string Base = $"{VersionBase}/movies";
+
+            ...
+        }
+        ...
+    }
+}
+```
 
 
 
