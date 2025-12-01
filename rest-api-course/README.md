@@ -333,3 +333,53 @@ public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest getAllMo
 }
 ```
 
+### HATEOAS implementation
+
+```csharp
+    public abstract class HalResponse
+    {
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public List<Link> Links { get; set; } = new();
+    }
+
+    public class Link
+    {
+        public required string Href { get; init; }
+        public required string Rel { get; init; }
+        public string? Type { get; init; }
+    }
+```
+
+Extends the MovieResponse to include HATEOAS Links
+
+```csharp
+public class MovieResponse : HalResponse
+{
+    ...
+}
+```
+
+Adding Links in the Controller before returning the response
+
+```csharp
+[HttpGet(ApiEndpoints.Movies.Get)]
+public async Task<IActionResult> Get([FromRoute] string idOrSlug,
+    [FromServices] LinkGenerator linkGenerator,
+    CancellationToken cancellationToken)
+{
+    ...
+
+    var movieResponse = movie.MapToResponse();
+
+    var movieObj = new { id = movie.Id };
+    movieResponse.Links.Add(new Link
+    {
+        Href = linkGenerator.GetPathByAction(HttpContext, nameof(Get), values: new { idOrSlug = movie.Id }) ?? string.Empty,
+        Rel = "self",
+        Type = "GET"
+    });
+
+    ...
+}
+```
+

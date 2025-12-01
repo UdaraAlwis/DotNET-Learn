@@ -135,7 +135,7 @@ namespace Movies.Application.Repositories
 
             var genres = await connection.QueryAsync<string>(new CommandDefinition(
                 """
-                SELECT name FROM genres WHERE movieid = @movieId
+                SELECT name FROM genres WHERE movieid = @Id
                 """, new { movie.Id }, cancellationToken: cancellationToken));
 
             foreach (var genre in genres)
