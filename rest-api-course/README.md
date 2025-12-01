@@ -525,6 +525,57 @@ builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
 *It is recommended to keep 1 version per Controller*
 
 
+### Swagger Authentication
+
+Update the ConfigureSwaggerOptions.cs to include Security Definition and Requirement
+
+```csharp
+options.AddSecurityDefinition("Brearer", new OpenApiSecurityScheme()
+{
+    In = ParameterLocation.Header,
+    Description = "Please enter a valid token",
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    BearerFormat = "JWT",
+    Scheme = "Bearer"
+});
+
+options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+{
+    {
+        new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = "Brearer"
+            }
+        },
+        Array.Empty<string>()
+    }
+});
+```
+
+### Endpoint response types in Swagger 
+
+Exposing the possible return types of Endpoints in Swagger using ```ProducesResponseType``` attribute
+
+```csharp
+[Authorize(AuthConstants.TrustedMemberPolicyName)]
+[HttpPut(ApiEndpoints.Movies.Update)]
+[ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
+public async Task<IActionResult> Update(...)
+{
+    ...
+}
+```
+
+
+
+
+
 
 
 (THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)

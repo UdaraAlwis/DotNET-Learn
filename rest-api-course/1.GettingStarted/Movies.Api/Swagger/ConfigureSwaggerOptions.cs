@@ -28,5 +28,30 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                     Version = description.ApiVersion.ToString(),
                 });
         }
+
+        options.AddSecurityDefinition("Brearer", new OpenApiSecurityScheme()
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter a valid token",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "Bearer"
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Brearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
     }
 }
