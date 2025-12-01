@@ -31,7 +31,6 @@ namespace Movies.Api.Controllers
 
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug,
-            [FromServices] LinkGenerator linkGenerator,
             CancellationToken cancellationToken)
         {
             var userId = HttpContext.GetUserId();
@@ -44,29 +43,6 @@ namespace Movies.Api.Controllers
             }
 
             var movieResponse = movie.MapToResponse();
-
-            var movieObj = new { id = movie.Id };
-            movieResponse.Links.Add(new Link
-            {
-                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Get), values: new { idOrSlug = movie.Id }) ?? string.Empty,
-                Rel = "self",
-                Type = "GET"
-            });
-
-            movieResponse.Links.Add(new Link
-            {
-                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Update), values: movieObj) ?? string.Empty,
-                Rel = "self",
-                Type = "PUT"
-            });
-
-            movieResponse.Links.Add(new Link
-            {
-                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }) ?? string.Empty,
-                Rel = "self",
-                Type = "DELETE"
-            });
-
             return Ok(movieResponse);
         }
 

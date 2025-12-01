@@ -383,3 +383,11 @@ public async Task<IActionResult> Get([FromRoute] string idOrSlug,
 }
 ```
 
+*HATEOAS unnecessarily bloats the response size and complexity, so it will be undone in the project!*
+
+
+
+
+
+
+(THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)
