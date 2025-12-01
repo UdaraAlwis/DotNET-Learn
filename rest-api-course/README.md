@@ -420,6 +420,50 @@ public static class ApiEndpoints
 }
 ```
 
+*This is not an ideal way of versioning as its more manual and bloated*
+
+Advanced Versioning with ```Asp.Versioning.Mvc``` package
+
+Program.cs
+
+```csharp
+builder.Services.AddApiVersioning(x =>
+{
+    x.DefaultApiVersion = new ApiVersion(1.0);
+    x.AssumeDefaultVersionWhenUnspecified = true;
+    x.ReportApiVersions = true;
+    x.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
+}).AddMvc();
+```
+
+Then in Controllers define the version in Header
+
+```csharp
+[ApiVersion(1.0, Deprecated = true)]
+[HttpGet(ApiEndpoints.Movies.Get)]
+public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
+    CancellationToken cancellationToken)
+{
+    ...
+}
+
+...
+
+[ApiVersion(2.0)]
+[HttpGet(ApiEndpoints.Movies.Get)]
+public async Task<IActionResult> GetV2([FromRoute] string idOrSlug,
+    CancellationToken cancellationToken)
+{
+    ...
+}
+```
+
+In client side request add the request Header,
+```
+Accept: application/json; api-version=2.0
+```
+
+
 
 
 
