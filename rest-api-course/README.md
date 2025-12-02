@@ -592,7 +592,27 @@ public class DatabaseHealthCheck : IHealthCheck
 }
 ```
 
+### Response Caching
 
+In Program.cs
+
+```csharp
+builder.Services.AddResponseCaching();
+...
+app.UseResponseCaching();
+```
+
+Then in the Controller add the ResponseCache attribute
+
+```csharp
+[HttpGet(ApiEndpoints.Movies.Get)]
+[ResponseCache(Duration = 30, VaryByHeader = "Accept, Accept-Encoding", Location = ResponseCacheLocation.Any)]
+...
+public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
+    CancellationToken cancellationToken)
+{
+    ...
+}
 
 
 
