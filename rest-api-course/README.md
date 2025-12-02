@@ -594,6 +594,8 @@ public class DatabaseHealthCheck : IHealthCheck
 
 ### Response Caching
 
+Client side caching with Response Caching Middleware
+
 In Program.cs
 
 ```csharp
@@ -613,6 +615,57 @@ public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
 {
     ...
 }
+
+
+### Output Caching
+
+Server side caching with Output Caching Middleware
+
+In Program.cs
+
+```csharp
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Cache());
+    options.AddPolicy("MovieCache",builder =>
+    {
+        builder.Cache().Expire(TimeSpan.FromMinutes(1))
+        .SetVaryByQuery(new[] { "title", "yearOfRelease", "sortBy", "page", "pageSize" })
+        .Tag("movies");
+    });
+});
+...
+
+app.UseOutputCache();
+```
+
+Then in the Controller add the OutputCache attribute
+
+```csharp
+[HttpGet(ApiEndpoints.Movies.GetAll)]
+[OutputCache(PolicyName = "MovieCache")]
+public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, 
+    CancellationToken cancellationToken)
+{
+    ...
+}
+```
+
+You need to invalidate the cache when a movie is created, updated or deleted 
+Use the IOutputCacheStore to evict the cache by tag
+
+```csharp
+public class MoviesController : ControllerBase
+{
+    ...
+    private readonly IOutputCacheStore _outputCacheStore;
+    ...
+
+
+    await _outputCacheStore.EvictByTagAsync("movies", cancellationToken);
+}
+```
+
 
 
 

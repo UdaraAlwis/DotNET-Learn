@@ -55,7 +55,17 @@ builder.Services.AddApiVersioning(x =>
     x.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
 }).AddMvc().AddApiExplorer();
 
-builder.Services.AddResponseCaching();
+//builder.Services.AddResponseCaching();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Cache());
+    options.AddPolicy("MovieCache",builder =>
+    {
+        builder.Cache().Expire(TimeSpan.FromMinutes(1))
+        .SetVaryByQuery(new[] { "title", "yearOfRelease", "sortBy", "page", "pageSize" })
+        .Tag("movies");
+    });
+});
 
 builder.Services.AddControllers();
 
@@ -91,7 +101,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 //app.UseCors();
-app.UseResponseCaching();
+//app.UseResponseCaching();
+app.UseOutputCache();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
