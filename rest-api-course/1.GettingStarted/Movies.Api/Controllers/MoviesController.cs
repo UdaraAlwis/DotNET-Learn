@@ -23,7 +23,8 @@ namespace Movies.Api.Controllers
             _outputCacheStore = outputCacheStore;
         }
 
-        [Authorize(AuthConstants.TrustedMemberPolicyName)]
+        //[Authorize(AuthConstants.TrustedMemberPolicyName)]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         [HttpPost(ApiEndpoints.Movies.Create)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
@@ -99,6 +100,7 @@ namespace Movies.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
         {
+            var userId = HttpContext.GetUserId();
             var result = await _movieService.DeleteByIdAsync(id, cancellationToken);
             if (!result)
                 return NotFound();

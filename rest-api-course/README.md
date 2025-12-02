@@ -666,6 +666,112 @@ public class MoviesController : ControllerBase
 }
 ```
 
+### Api Key based Authentication
+
+Authenticate using an API Key passed in the request header
+
+To be used for Service to Service communication
+
+AuthConstants.cs
+```csharp
+public const string ApiKeyHeaderName = "x-api-key";
+```
+
+Implement ApiKeyAuthFilter.cs
+
+```csharp
+public class ApiKeyAuthFilter : IAuthorizationFilter
+{
+    ...
+
+    public void OnAuthorization(AuthorizationFilterContext context)
+    {
+        if(!context.HttpContext.Request.Headers.TryGetValue(AuthConstants.ApiKeyHeaderName, 
+            out var extractedApiKey))
+        {
+            context.Result = new UnauthorizedObjectResult("API Key Missing!");
+            return;
+        }
+
+        var apiKey = _configuration["ApiKey"]!;
+        if(!apiKey.Equals(extractedApiKey))
+        {
+            context.Result = new UnauthorizedObjectResult("Invalid API Key!");
+            return;
+        }
+    }
+}   
+```
+
+Register the ApiKeyAuthFilter in Program.cs
+
+```csharp
+builder.Services.AddScoped<ApiKeyAuthFilter>();
+```
+
+Then in the Controller add the ServiceFilter attribute
+
+```csharp
+[ServiceFilter(typeof(ApiKeyAuthFilter))]
+...
+public async Task<IActionResult> Create([FromBody]CreateMovieRequest request, 
+    CancellationToken cancellationToken)
+{
+    ...
+}
+```
+
+### Mixed Authentication: Either with JWT or API Key
+
+Based on either JWT Bearer Token or API Key in Header
+
+Implement AdminAuthRequirement.cs
+
+```csharp
+public class AdminAuthRequirement : IAuthorizationHandler, IAuthorizationRequirement
+{
+    ...
+    
+    public Task HandleAsync(AuthorizationHandlerContext context)
+    {
+        if(context.User.HasClaim(AuthConstants.AdminUserClaimName, "true"))
+        {
+            context.Succeed(this);
+            return Task.CompletedTask;
+        }
+
+        var httpContext = context.Resource as HttpContext;
+        if(httpContext is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        ...
+
+        var identity = (ClaimsIdentity)httpContext.User.Identity!;
+        // Add the admin claim if API Key is valid
+        identity.AddClaim(new Claim("userid", "61325d03-5f97-4d46-8ce0-e613a187a94b"));
+        context.Succeed(this);
+        return Task.CompletedTask;
+    }
+}
+```
+
+Then in Program.cs register the Authorization
+
+```csharp
+builder.Services.AddAuthorization(x =>
+{
+    x.AddPolicy(AuthConstants.AdminUserPolicyName, 
+        p => p.AddRequirements(new AdminAuthRequirement(config["ApiKey"]!)));
+
+    ...
+});
+```
+
+
+
+
 
 
 
