@@ -572,7 +572,25 @@ public async Task<IActionResult> Update(...)
 }
 ```
 
+### Health Checks
 
+In Program.cs
+
+```csharp
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>(DatabaseHealthCheck.Name);
+
+...
+app.MapHealthChecks("_health");
+```
+
+Create DatabaseHealthCheck.cs to check the database connectivity
+
+```csharp
+public class DatabaseHealthCheck : IHealthCheck
+{
+    ...
+}
+```
 
 
 
