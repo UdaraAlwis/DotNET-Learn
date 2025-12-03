@@ -797,7 +797,72 @@ var moviesApi = RestService.For<IMoviesApi>("https://localhost:7258");
 var movie = await moviesApi.GetMovieAsync("crimson-skies-2015");
 ```
 
+### Using HttpClient Factory in the SDK Consumer
 
+Install Microsoft.Extensions.DependencyInjection in the Consumer project
+
+Install Refit.HttpClientFactory in the Consumer project
+
+Register the Refit Client with HttpClient Factory
+
+```csharp
+var services = new ServiceCollection();
+builder.Services.AddRefitClient<IMoviesApi>()
+    .ConfigureHttpClient(c => 
+    {
+        c.BaseAddress = new Uri("https://localhost:7258");
+    });
+var provider = services.BuildServiceProvider();
+```
+
+Then access the IMoviesApi instance when you need it
+
+```csharp
+var moviesApi = provider.GetRequiredService<IMoviesApi>();
+```
+
+### Handling Token Generation and Refreshing in the SDK Consumer
+
+Add the Authorization Header to the IMoviesApi.cs
+
+```csharp
+[Headers("Authorization: Bearer")]
+public interface IMoviesApi
+{
+    ...
+}
+```
+
+Implement AuthTokenProvider.cs as a simple token provider
+
+```csharp
+public class AuthTokenProvider
+{
+    public async Task<string> GetTokenAsync()
+    {
+        // Call the Identity API to get the JWT token
+        ...
+    }
+}
+```
+
+Then register that in the DI Container and configure Refit to use that for Authorization
+
+```csharp
+services
+    ...
+    .AddSingleton<AuthTokenProvider>()
+    .AddRefitClient<IMoviesApi>(s => 
+        new RefitSettings()
+        {
+            AuthorizationHeaderValueGetter = async (requestMessage, cancellationToken) =>
+            {
+                var tokenProvider = s.GetRequiredService<AuthTokenProvider>();
+                var token = await tokenProvider.GetTokenAsync();
+                return token;
+            }
+        }).ConfigureHttpClient(...);
+```
 
 
 
