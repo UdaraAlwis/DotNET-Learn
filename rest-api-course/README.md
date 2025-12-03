@@ -2,10 +2,10 @@
 
 https://dometrain.com/course/from-zero-to-hero-rest-apis-in-asp-net-core/
 
-Movies.Api - Contains the API Controllers
-Movies.Application - Contains the Business Logic
-Movies.Contracts - Contains the DTOs
-
+- Movies.Api - Contains the API Controllers
+- Movies.Application - Contains the Business Logic
+- Movies.Contracts - Contains the DTOs
+- Helpers - Identiy.Api - A simple Identity API for JWT Generation
 
 #### - Use CreatedAtAction instead of Ok() or Created() for easy Location headers
 
@@ -615,7 +615,7 @@ public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
 {
     ...
 }
-
+```
 
 ### Output Caching
 
@@ -767,6 +767,34 @@ builder.Services.AddAuthorization(x =>
 
     ...
 });
+```
+
+### Creating an SDK for the REST API with Refit
+
+Structure,
+- Movies.Api.Sdk - Contains the Refit interfaces for connecting to the API
+- Movies.Api.Sdk.Consumer - A console app that consumes the SDK
+
+Install Refit package in Movies.Api.Sdk project
+
+Create IMoviesApi.cs interface
+
+```csharp
+public interface IMoviesApi
+{
+    [Get(ApiEndpoints.Movies.Get)]
+    Task<MovieResponse> GetMovieAsync(string idOrSlug);
+    ...
+}
+```
+
+Consume it in the Movies.Api.Sdk.Consumer project
+
+```csharp
+
+var moviesApi = RestService.For<IMoviesApi>("https://localhost:7258");
+
+var movie = await moviesApi.GetMovieAsync("crimson-skies-2015");
 ```
 
 

@@ -32,16 +32,14 @@ builder.Services.AddAuthentication(x =>
         ValidateIssuer = true,
         ValidateAudience = true
     };
-    
 });
-
-// Add services to the container.
 
 builder.Services.AddAuthorization(x =>
 {
     //x.AddPolicy(AuthConstants.AdminUserPolicyName, 
     //    p => p.RequireClaim(AuthConstants.AdminUserClaimName, "true"));
 
+    // Policy for validating admin users via API key
     x.AddPolicy(AuthConstants.AdminUserPolicyName, 
         p => p.AddRequirements(new AdminAuthRequirement(config["ApiKey"]!)));
 
@@ -51,6 +49,7 @@ builder.Services.AddAuthorization(x =>
             c.User.HasClaim(claim => claim is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
 
+// For validating any API key
 builder.Services.AddScoped<ApiKeyAuthFilter>();
 
 builder.Services.AddApiVersioning(x =>

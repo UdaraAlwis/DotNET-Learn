@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Movies.Api.Auth
 {
+    /// <summary>
+    /// Authorization filter for validating API key from request headers.
+    /// </summary>
     public class ApiKeyAuthFilter : IAuthorizationFilter
     {
         private readonly IConfiguration _configuration;
