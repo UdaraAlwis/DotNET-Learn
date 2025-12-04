@@ -6,10 +6,9 @@
         {
             app.MapGetMovie();
             app.MapCreateMovie();
-
-            //app.MapGetAllMovies();
-            //app.MapUpdateMovie();
-            //app.MapDeleteMovie();
+            app.MapGetAllMovies();
+            app.MapUpdateMovie();
+            app.MapDeleteMovie();
             return app;
         }
     }

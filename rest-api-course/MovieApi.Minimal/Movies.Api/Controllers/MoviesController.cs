@@ -73,8 +73,10 @@ namespace Movies.Api.Controllers
             var movies = await _movieService.GetAllAsync(options, cancellationToken);
             var moviesCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, cancellationToken);
 
-            var moviesResponse = movies?.MapToResponse(request.Page, request.PageSize, moviesCount);
-            return Ok(moviesResponse);
+            //var moviesResponse = movies?.MapToResponse(request.Page, request.PageSize, moviesCount);
+            //return Ok(moviesResponse);
+
+            return Ok();
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
@@ -102,7 +104,6 @@ namespace Movies.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            var userId = HttpContext.GetUserId();
             var result = await _movieService.DeleteByIdAsync(id, cancellationToken);
             if (!result)
                 return NotFound();
