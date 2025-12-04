@@ -864,6 +864,62 @@ services
         }).ConfigureHttpClient(...);
 ```
 
+### Migrating to Minimal APIs
+
+Minimal API concept,
+
+Dedicate 1 class for each endpoint
+
+Structure:
+
+Endpoints
+    Movies
+        GetMovieEndpoint.cs
+        MovieEndpointExtensions.cs
+        ...
+    Ratings
+        ...
+EndpointsExtensions.cs
+
+Create EndpointsExtensions.cs
+
+```csharp
+public static class EndpointsExtensions
+{
+    public static IEndpointRouteBuilder MapApiEndpoints(this IEndpointRouteBuilder app)
+    {
+        app.MapMovieEndpoints();
+        app.MapRoutingEndpoints();
+        return app;
+    }
+}
+```
+
+Then register that in Program.cs
+
+```csharp
+app.MapApiEndpoints();
+```
+
+Create GetMovieEndpoint.cs for replacing the MoviesController.GetV1 method
+
+```csharp
+public static class GetMovieEndpoint
+{
+    public const string Name = "GetMovie";
+
+    public static IEndpointRouteBuilder MapGetMovie(this IEndpointRouteBuilder app)
+    {
+        app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieService, 
+            HttpContext context, CancellationToken cancellationToken) =>
+        {
+            // The usual endpoint logic goes here
+            ...
+        }).WithName(Name);;
+        return app;
+    }
+}
+```
 
 
 
