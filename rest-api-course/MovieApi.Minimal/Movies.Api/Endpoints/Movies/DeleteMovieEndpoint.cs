@@ -21,6 +21,8 @@ namespace Movies.Api.Endpoints.Movies
                 await outputCacheStore.EvictByTagAsync("movies", cancellationToken);
                 return TypedResults.Ok(result);
             }).WithName(Name)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
             .RequireAuthorization(AuthConstants.AdminUserPolicyName);
 
             return app;

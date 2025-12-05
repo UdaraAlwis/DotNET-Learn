@@ -1,6 +1,7 @@
 ﻿using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.Endpoints.Ratings
 {
@@ -19,6 +20,7 @@ namespace Movies.Api.Endpoints.Ratings
 
                 return TypedResults.Ok(response);
             }).WithName(Name)
+            .Produces<IEnumerable<MovieRatingResponse>>(StatusCodes.Status200OK)
             .RequireAuthorization();
 
             return app;

@@ -921,21 +921,47 @@ public static class GetMovieEndpoint
 }
 ```
 
-Adding Authorization to Minimal API Endpoints with `RequireAuthorization()`
+Adding Authorization with `RequireAuthorization()`
 
 ```csharp
 ...
 app.MapDelete(ApiEndpoints.Movies.Delete, async (
-    Guid id, IMovieService movieService, IOutputCacheStore outputCacheStore, 
-    CancellationToken cancellationToken) =>
+    ... ) =>
 {
     ...
 }).WithName(Name)
 .RequireAuthorization(AuthConstants.AdminUserPolicyName);
 ```
 
+Adding Swagger support 
 
+Remove Asp.Versioning.Mvc
+Add Asp.Versioning.Http package
 
+Then in Program.cs
+
+Remove AddMvc() call and add the following
+
+```csharp
+...
+builder.Services.AddEndpointsApiExplorer();
+...
+```
+
+Adding return types for Swagger with `Produces<T>()`
+
+```csharp
+app.MapPut(ApiEndpoints.Movies.Update, async (
+    Guid id, UpdateMovieRequest request, 
+    ... ) =>
+{
+    ...
+}).WithName(Name)
+.Produces<MoviesResponse>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound)
+.Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
+.RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
+```
 
 
 

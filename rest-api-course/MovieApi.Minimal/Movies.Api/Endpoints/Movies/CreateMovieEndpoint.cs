@@ -3,6 +3,7 @@ using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.Endpoints.Movies
 {
@@ -12,7 +13,7 @@ namespace Movies.Api.Endpoints.Movies
         
         public static IEndpointRouteBuilder MapCreateMovie(this IEndpointRouteBuilder app)
         {
-            app.MapPost(ApiEndpoints.Movies.Create, async (CreateMovieRequest request, 
+            app.MapPost(ApiEndpoints.Movies.Create, async (CreateMovieRequest request,
                 IMovieService movieService, IOutputCacheStore outputCacheStore, CancellationToken cancellationToken) =>
             {
                 var movieToCreate = request.ToMovie();
@@ -23,6 +24,8 @@ namespace Movies.Api.Endpoints.Movies
 
                 return TypedResults.CreatedAtRoute(response, GetMovieEndpoint.Name, new { idOrSlug = movieToCreate.Id });
             }).WithName(Name)
+            .Produces<MovieResponse>(StatusCodes.Status201Created)
+            .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
             .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 
             return app;
