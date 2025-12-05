@@ -963,7 +963,61 @@ app.MapPut(ApiEndpoints.Movies.Update, async (
 .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 ```
 
+Handling Versioning
 
+Create ApiVersioning.cs
+
+```csharp
+public static class ApiVersioning
+{
+    public static ApiVersionSet VersionSet { get; private set; }
+
+    public static IEndpointRouteBuilder CreateApiVersionSet(this IEndpointRouteBuilder app)
+    {
+        VersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1.0))
+            .HasApiVersion(new ApiVersion(2.0))
+            .ReportApiVersions()
+            .Build();
+
+        return app;
+    }
+}
+```
+
+Thn in Program.cs call CreateApiVersionSet before mapping the endpoints
+
+```csharp
+...
+var app = builder.Build();
+
+app.CreateApiVersionSet();
+...
+```
+
+The in the Endpoint declaration add the versioning info
+
+```csharp
+public static IEndpointRouteBuilder MapGetAllMovies(this IEndpointRouteBuilder app)
+{
+    app.MapGet(ApiEndpoints.Movies.GetAll, async ([AsParameters] GetAllMoviesRequest request,
+        ... ) =>
+    {
+        ...
+    }).WithName($"{Name}V1")
+    .WithApiVersionSet(ApiVersioning.VersionSet)
+    .HasApiVersion(1.0);
+
+    app.MapGet(ApiEndpoints.Movies.GetAll, async ([AsParameters] GetAllMoviesRequest request,
+        ... ) =>
+    {
+       ...
+    }).WithName($"{Name}V2")
+    .WithApiVersionSet(ApiVersioning.VersionSet)
+    .HasApiVersion(2.0);
+    return app;
+}
+```
 
 
 (THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)
