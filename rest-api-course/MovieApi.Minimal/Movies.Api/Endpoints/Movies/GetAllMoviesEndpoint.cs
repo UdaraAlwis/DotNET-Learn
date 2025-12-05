@@ -48,7 +48,8 @@ namespace Movies.Api.Endpoints.Movies
             }).WithName($"{Name}V2")
             .Produces<MoviesResponse>(StatusCodes.Status200OK)
             .WithApiVersionSet(ApiVersioning.VersionSet)
-            .HasApiVersion(2.0);
+            .HasApiVersion(2.0)
+            .CacheOutput("MovieCache");
 
             return app;
         }

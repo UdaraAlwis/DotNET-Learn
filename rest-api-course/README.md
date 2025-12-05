@@ -1019,5 +1019,17 @@ public static IEndpointRouteBuilder MapGetAllMovies(this IEndpointRouteBuilder a
 }
 ```
 
+Adding Caching
+
+```csharp
+app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieService, 
+    ...) =>
+{
+    ...
+}).WithName(Name)
+.CacheOutput("MovieCache");
+```
+
+
 
 (THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)

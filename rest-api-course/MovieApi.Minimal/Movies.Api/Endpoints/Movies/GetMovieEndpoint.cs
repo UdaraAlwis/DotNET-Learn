@@ -27,7 +27,8 @@ namespace Movies.Api.Endpoints.Movies
                 return TypedResults.Ok(movieResponse);
             }).WithName(Name)
             .Produces<MovieResponse>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .CacheOutput("MovieCache");
             return app;
         }
     }
