@@ -921,6 +921,22 @@ public static class GetMovieEndpoint
 }
 ```
 
+Adding Authorization to Minimal API Endpoints with `RequireAuthorization()`
+
+```csharp
+...
+app.MapDelete(ApiEndpoints.Movies.Delete, async (
+    Guid id, IMovieService movieService, IOutputCacheStore outputCacheStore, 
+    CancellationToken cancellationToken) =>
+{
+    ...
+}).WithName(Name)
+.RequireAuthorization(AuthConstants.AdminUserPolicyName);
+```
+
+
+
+
 
 
 

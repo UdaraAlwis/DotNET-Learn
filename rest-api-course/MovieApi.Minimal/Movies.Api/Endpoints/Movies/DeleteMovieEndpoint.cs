@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.OutputCaching;
+using Movies.Api.Auth;
 using Movies.Application.Services;
 
 namespace Movies.Api.Endpoints.Movies
@@ -19,7 +20,8 @@ namespace Movies.Api.Endpoints.Movies
 
                 await outputCacheStore.EvictByTagAsync("movies", cancellationToken);
                 return TypedResults.Ok(result);
-            }).WithName(Name); ;
+            }).WithName(Name)
+            .RequireAuthorization(AuthConstants.AdminUserPolicyName);
 
             return app;
         }
