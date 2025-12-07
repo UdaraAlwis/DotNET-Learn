@@ -8,9 +8,11 @@ Finally, we migrated the entire API to use Minimal APIs.
 
 I followed along with the course instructor, implementing each feature step-by-step. At the same time, I made sure to take notes and note down important code snippets for future reference. I hope this documentation will be helpful for others looking to learn about building REST APIs with ASP.NET Core.
 
-I highly recommend this course to anyone interested in backend development with .NET, it provides a solid foundation for building RESTful services!
+I highly recommend this course to anyone interested in backend development with .NET, it provides a solid foundation for building REST API services!
 
 So, here we go!
+
+#### Starting Project Structure
 
 - Movies.Api - Contains the API Controllers
 - Movies.Application - Contains the Business Logic
@@ -1083,4 +1085,13 @@ app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieS
 
 ![Minimal API Structure](Screenshots/17%20Minimal%20API%20Structure.jpg)
 
+I created a separated MovieApi.Minimal project folder for the Minimal API implementation
+
+Also created two separate Build Configurations in the solution,
+- Movie.Api + Identity.Api - for the full controller based API
+- Movie.Api.Minimal + Identity.Api - for the Minimal API implementation
+
+You can run either of the configurations to test the respective API implementations.
+
 That's the end of the REST API course!
+Cheers!
