@@ -7,13 +7,17 @@ https://dometrain.com/course/from-zero-to-hero-rest-apis-in-asp-net-core/
 - Movies.Contracts - Contains the DTOs
 - Helpers - Identiy.Api - A simple Identity API for JWT Generation
 
-#### - Use CreatedAtAction instead of Ok() or Created() for easy Location headers
+
+![Movie.API Final Working Solution](Screenshots/1%20Movie.API%20final%20working%20solution.jpg)
+
+
+### Use CreatedAtAction instead of Ok() or Created() for easy Location headers
 
 ```csharp
 return CreatedAtAction(nameof(Get), new { id = movieToCreate.Id }, movieToCreate);
 ```
 
-#### - Register the Services in the Application Layer instead in the API Layer
+### Register the Services in the Application Layer instead in the API Layer
 
 ```csharp
 public static IServiceCollection AddApplication(this IServiceCollection services)
@@ -27,7 +31,7 @@ public static IServiceCollection AddApplication(this IServiceCollection services
 builder.Services.AddApplication();
 ```
 
-#### - Maintain Contract (DTO) Mapping at the API Layer
+### Maintain Contract (DTO) Mapping at the API Layer
 ```csharp
 public static MovieResponse ToMovieResponse(this Movie movie)
 {
@@ -41,7 +45,7 @@ public static MovieResponse ToMovieResponse(this Movie movie)
 }
 ```
 
-#### - Use API Routes for defining the endpoint paths
+### Use API Routes for defining the endpoint paths
 
 ```csharp
 public static class ApiEndpoints
@@ -118,6 +122,8 @@ var dbInitializer = app.Services.GetRequiredService<DbInitializer>();
 await dbInitializer.InitializeAsync();
 ```
 
+![CRUD Operations](Screenshots/1%20CRUD%20Operations.jpg)
+
 ### Adding a Service Layer
 
 Movies.Api
@@ -127,6 +133,8 @@ Movies.Application
     - Repositories (will be calling the Database)
 
 ### Adding Valiadtion
+
+![Data Validation](Screenshots/2%20Data%20Validation.jpg)
 
 Using FluentValidation.DependencyInjectionExtensions in the Movies.Application layer
 
@@ -233,6 +241,8 @@ public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationT
 
 ### Authentication and Authorization with JWT
 
+![Authentication](Screenshots/3%20Authentication.jpg)
+
 With the use of Microsoft.AspNetCore.Authentication.JwtBearer in Movies.Api layer
 
 ```csharp
@@ -273,6 +283,8 @@ public class MovieController : ControllerBase
 
 ### Validating claims and limiting actions
 
+![Endpoints with Auth](Screenshots/4%20Endpoints%20with%20Auth.jpg)
+
 ```csharp
 builder.Services.AddAuthorization(x =>
 {
@@ -307,6 +319,12 @@ if (Guid.TryParse(userId?.Value, out Guid parsedId))
 
 ### Passing Query Parameters to Application Layer
 
+![Endpoints with Query Params](Screenshots/5%20Endpoints%20with%20Query%20Params.jpg)
+
+![Endpoints with Query Params and Sorting](Screenshots/5%20Endpoints%20with%20Query%20Params%20w%20Sorting.jpg)
+
+![Pagination](Screenshots/5%20Pagination.jpg)
+
 ```csharp
 [HttpGet(ApiEndpoints.Movies.GetAll)]
 public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, 
@@ -334,6 +352,8 @@ public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest getAllMo
 ```
 
 ### HATEOAS implementation
+
+![HATEOAS approach](Screenshots/6%20HATEOAS%20approach.jpg)
 
 ```csharp
     public abstract class HalResponse
@@ -387,6 +407,8 @@ public async Task<IActionResult> Get([FromRoute] string idOrSlug,
 
 ### Versioning the API
 
+![Basic Versioning](Screenshots/7%20Basic%20Versioning.jpg)
+
 Basic Versioning with URL Segmenting
 
 ```csharp
@@ -421,6 +443,8 @@ public static class ApiEndpoints
 ```
 
 *This is not an ideal way of versioning as its more manual and bloated*
+
+![Advanced Versioning](Screenshots/8%20Advanced%20Versioning.jpg)
 
 Advanced Versioning with ```Asp.Versioning.Mvc``` package
 
@@ -464,6 +488,8 @@ Accept: application/json; api-version=2.0
 ```
 
 ### Swagger and Versioning
+
+![Advanced Versioning with Swagger](Screenshots/9%20Advanced%20Versioning%20with%20Swagger.jpg)
 
 Implementing Versioning with Swagger using ```Asp.Versioning.Mvc.ApiExplorer``` package
 
@@ -556,7 +582,9 @@ options.AddSecurityRequirement(new OpenApiSecurityRequirement()
 });
 ```
 
-### Endpoint response types in Swagger 
+### Endpoint response types in Swagger
+
+![Endpoint Response types with Swagger](Screenshots/10%20Endpoint%20Response%20types%20with%20Swagger.jpg)
 
 Exposing the possible return types of Endpoints in Swagger using ```ProducesResponseType``` attribute
 
@@ -573,6 +601,8 @@ public async Task<IActionResult> Update(...)
 ```
 
 ### Health Checks
+
+![Healthcheck](Screenshots/11%20Healthcheck.jpg)
 
 In Program.cs
 
@@ -593,6 +623,8 @@ public class DatabaseHealthCheck : IHealthCheck
 ```
 
 ### Response Caching
+
+![Response Caching](Screenshots/12%20Response%20Caching.jpg)
 
 Client side caching with Response Caching Middleware
 
@@ -723,6 +755,8 @@ public async Task<IActionResult> Create([FromBody]CreateMovieRequest request,
 
 ### Mixed Authentication: Either with JWT or API Key
 
+![Multiple Auth Schemes](Screenshots/13%20Multiple%20Auth%20Schemes.jpg)
+
 Based on either JWT Bearer Token or API Key in Header
 
 Implement AdminAuthRequirement.cs
@@ -771,6 +805,8 @@ builder.Services.AddAuthorization(x =>
 
 ### Creating an SDK for the REST API with Refit
 
+![Creating an SDK for API and Consuming it with Refit](Screenshots/14%20Creating%20an%20SDK%20for%20API%20and%20Consuming%20it%20with%20Refit.jpg)
+
 Structure,
 - Movies.Api.Sdk - Contains the Refit interfaces for connecting to the API
 - Movies.Api.Sdk.Consumer - A console app that consumes the SDK
@@ -798,6 +834,8 @@ var movie = await moviesApi.GetMovieAsync("crimson-skies-2015");
 ```
 
 ### Using HttpClient Factory in the SDK Consumer
+
+![Consuming all the endpoints from Console Client app](Screenshots/15%20Consuming%20all%20the%20endpoints%20from%20Console%20Client%20app.jpg)
 
 Install Microsoft.Extensions.DependencyInjection in the Consumer project
 
@@ -921,6 +959,9 @@ public static class GetMovieEndpoint
 }
 ```
 
+![Migrating to Minimal API Endpoints](Screenshots/16%20Migrating%20to%20Minimal%20API%20Endpoints.jpg)
+
+
 Adding Authorization with `RequireAuthorization()`
 
 ```csharp
@@ -1030,6 +1071,7 @@ app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieS
 .CacheOutput("MovieCache");
 ```
 
+![Minimal API Structure](Screenshots/17%20Minimal%20API%20Structure.jpg)
 
 
 (THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)
