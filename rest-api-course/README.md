@@ -1094,4 +1094,7 @@ Also created two separate Build Configurations in the solution,
 You can run either of the configurations to test the respective API implementations.
 
 That's the end of the REST API course!
+
+![Course Completion Certificate](Screenshots/18%20Certificate-iZnUZBMkAU9AS1.png)
+
 Cheers!
