@@ -1,6 +1,16 @@
 # From Zero to Hero: REST APIs in .NET
 
-https://dometrain.com/course/from-zero-to-hero-rest-apis-in-asp-net-core/
+**Course:** [From Zero to Hero: REST APIs in ASP.NET Core](https://dometrain.com/course/from-zero-to-hero-rest-apis-in-asp-net-core/)
+
+I undertook this course to learn how to build robust and scalable REST APIs using ASP.NET Core. The course covers a wide range of topics, from the basics of setting up a web API to advanced concepts like authentication, authorization, versioning, and caching. 
+Towards the end, we explored creating an SDK for the API using Refit. 
+Finally, we migrated the entire API to use Minimal APIs.
+
+I followed along with the course instructor, implementing each feature step-by-step. At the same time, I made sure to take notes and note down important code snippets for future reference. I hope this documentation will be helpful for others looking to learn about building REST APIs with ASP.NET Core.
+
+I highly recommend this course to anyone interested in backend development with .NET, it provides a solid foundation for building RESTful services!
+
+So, here we go!
 
 - Movies.Api - Contains the API Controllers
 - Movies.Application - Contains the Business Logic
@@ -8,7 +18,7 @@ https://dometrain.com/course/from-zero-to-hero-rest-apis-in-asp-net-core/
 - Helpers - Identiy.Api - A simple Identity API for JWT Generation
 
 
-![Movie.API Final Working Solution](Screenshots/1%20Movie.API%20final%20working%20solution.jpg)
+![Movie.API My Final Working Solution](Screenshots/1%20Movie.API%20final%20working%20solution.jpg)
 
 
 ### Use CreatedAtAction instead of Ok() or Created() for easy Location headers
@@ -962,7 +972,7 @@ public static class GetMovieEndpoint
 ![Migrating to Minimal API Endpoints](Screenshots/16%20Migrating%20to%20Minimal%20API%20Endpoints.jpg)
 
 
-Adding Authorization with `RequireAuthorization()`
+#### Adding Authorization with `RequireAuthorization()`
 
 ```csharp
 ...
@@ -974,7 +984,7 @@ app.MapDelete(ApiEndpoints.Movies.Delete, async (
 .RequireAuthorization(AuthConstants.AdminUserPolicyName);
 ```
 
-Adding Swagger support 
+#### Adding Swagger support 
 
 Remove Asp.Versioning.Mvc
 Add Asp.Versioning.Http package
@@ -989,7 +999,7 @@ builder.Services.AddEndpointsApiExplorer();
 ...
 ```
 
-Adding return types for Swagger with `Produces<T>()`
+#### Adding return types for Swagger with `Produces<T>()`
 
 ```csharp
 app.MapPut(ApiEndpoints.Movies.Update, async (
@@ -1004,7 +1014,7 @@ app.MapPut(ApiEndpoints.Movies.Update, async (
 .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 ```
 
-Handling Versioning
+#### Handling Versioning
 
 Create ApiVersioning.cs
 
@@ -1036,7 +1046,7 @@ app.CreateApiVersionSet();
 ...
 ```
 
-The in the Endpoint declaration add the versioning info
+Then in the Endpoint declaration add the versioning info
 
 ```csharp
 public static IEndpointRouteBuilder MapGetAllMovies(this IEndpointRouteBuilder app)
@@ -1060,7 +1070,7 @@ public static IEndpointRouteBuilder MapGetAllMovies(this IEndpointRouteBuilder a
 }
 ```
 
-Adding Caching
+#### Adding Caching
 
 ```csharp
 app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieService, 
@@ -1073,5 +1083,4 @@ app.MapGet(ApiEndpoints.Movies.Get, async (string idOrSlug, IMovieService movieS
 
 ![Minimal API Structure](Screenshots/17%20Minimal%20API%20Structure.jpg)
 
-
-(THIS IS STILL A WORK IN PROGRESS. MORE TO COME SOON)
+That's the end of the REST API course!
