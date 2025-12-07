@@ -12,16 +12,16 @@ I highly recommend this course to anyone interested in backend development with 
 
 So, here we go!
 
+### Sneak Peek: Final Working Solution
+
+![Movie.API My Final Working Solution](Screenshots/1%20Movie.API%20final%20working%20solution.jpg)
+
 #### Starting Project Structure
 
 - Movies.Api - Contains the API Controllers
 - Movies.Application - Contains the Business Logic
 - Movies.Contracts - Contains the DTOs
 - Helpers - Identiy.Api - A simple Identity API for JWT Generation
-
-
-![Movie.API My Final Working Solution](Screenshots/1%20Movie.API%20final%20working%20solution.jpg)
-
 
 ### Use CreatedAtAction instead of Ok() or Created() for easy Location headers
 
