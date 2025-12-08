@@ -138,11 +138,11 @@ await dbInitializer.InitializeAsync();
 
 ### Adding a Service Layer
 
-Movies.Api
-    - Controllers (will be calling the Services)
-Movies.Application
-    - Services (will be calling the Repositories)
-    - Repositories (will be calling the Database)
+- **Movies.Api**
+  - Controllers (will be calling the Services)
+- **Movies.Application**
+  - Services (will be calling the Repositories)
+  - Repositories (will be calling the Database)
 
 ### Adding Valiadtion
 
