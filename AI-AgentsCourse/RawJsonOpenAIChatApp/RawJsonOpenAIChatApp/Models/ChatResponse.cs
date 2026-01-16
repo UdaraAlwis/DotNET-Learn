@@ -1,8 +1,8 @@
-﻿namespace OpenAIConsoleChatApp.Models;
+﻿namespace RawJsonOpenAIChatApp.Models;
 
 public class ChatResponse
 {
-    public required List<Choice> Choice { get; set; }
+    public required List<Choice> Choices { get; set; }
 }
 
 public class Choice

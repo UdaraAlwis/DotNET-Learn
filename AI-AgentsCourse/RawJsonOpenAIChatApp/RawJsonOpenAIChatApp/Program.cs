@@ -1,6 +1,5 @@
 ﻿using dotenv.net;
-using OpenAI.Chat;
-using OpenAI.Responses;
+using RawJsonOpenAIChatApp.Models;
 
 DotEnv.Load();
 var openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
@@ -10,33 +9,41 @@ if (string.IsNullOrEmpty(openAiApiKey))
     throw new InvalidOperationException("OPENAI_API_KEY environment variable is not set.");
 }
 
-ChatClient client = new ChatClient(model: "gpt-4.1-nano", openAiApiKey);
+List<ChatMessage> messages = new()
+{
+    new ChatMessage
+    {
+        Role = ChatRole.System,
+        Content = "Hello, what do you want to do today?"
+    },
+};
 
-List<ChatMessage> messages = [
-    new AssistantChatMessage("Hello! How can I assist you today?")
-];
+Console.WriteLine(messages[0].Content);
 
-Console.WriteLine(messages[0].Content[0].Text);
+var aiService = new RawJsonOpenAIChatApp.Services.OpenAiService(openAiApiKey);
 
 while (true)
 {
     Console.ForegroundColor = ConsoleColor.Blue;
-    var input = Console.ReadLine();
 
-    if (string.IsNullOrWhiteSpace(input) || input?.ToLower() == "exit")
+    var userInput = Console.ReadLine();
+
+    if (string.IsNullOrWhiteSpace(userInput) || userInput?.ToLower() == "exit")
     {
         break;
     }
 
     Console.ResetColor();
 
-    messages.Add(new UserChatMessage(input!));
+    messages.Add(new ChatMessage
+    {
+        Role = ChatRole.User,
+        Content = userInput
+    });
 
-    ChatCompletion completion = client.CompleteChat(messages);
+    var responseMessage = await aiService.CompleteChat(messages);
 
-    var response = completion.Content[0].Text;
+    messages.Add(responseMessage);
 
-    messages.Add(new AssistantChatMessage(response));
-
-    Console.WriteLine(response);
+    Console.WriteLine(responseMessage.Content);
 }

@@ -1,4 +1,4 @@
-﻿namespace OpenAIConsoleChatApp.Models;
+﻿namespace RawJsonOpenAIChatApp.Models;
 
 public class ChatMessage
 {
