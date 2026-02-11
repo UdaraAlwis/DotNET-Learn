@@ -1,5 +1,6 @@
 ﻿using dotenv.net;
 using RawJsonOpenAIChatApp.Models;
+using RawJsonOpenAIChatApp.Services;
 
 DotEnv.Load();
 var openAiApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
@@ -20,7 +21,7 @@ List<ChatMessage> messages = new()
 
 Console.WriteLine(messages[0].Content);
 
-var aiService = new RawJsonOpenAIChatApp.Services.OpenAiService(openAiApiKey);
+var aiService = new OpenAiService(openAiApiKey);
 
 while (true)
 {
