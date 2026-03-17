@@ -1,7 +1,10 @@
-﻿using dotenv.net;
+﻿using ConsoleAgentChatApp;
+using dotenv.net;
 using Microsoft.Extensions.Hosting;
 
-DotEnv.Load();
+// Load .env file from the correct location
+var envPath = Path.Combine(AppContext.BaseDirectory, ".env");
+DotEnv.Load(new DotEnvOptions().WithEnvFiles(envPath));
 
 string provider = "openai";
 string model = "gpt-4.1-mini";
@@ -17,4 +20,7 @@ for (int i = 0; i < args.Length; i++)
 
 
 var builder = Host.CreateApplicationBuilder(args);
+Startup.ConfigureServices(builder, provider, model);
+var host = builder.Build();
 
+await ChatAgent.RunAsync(host.Services);

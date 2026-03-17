@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleAgentChatApp": {
+      "commandName": "Project",
+      "commandLineArgs": "--provider openai --model gpt-4o-mini"
+    }
+  }
+}
