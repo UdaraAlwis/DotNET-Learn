@@ -25,7 +25,7 @@ namespace ConsoleAgentChatApp
 
             while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 var input = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(input))

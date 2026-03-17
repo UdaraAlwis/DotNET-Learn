@@ -5,10 +5,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>1cda50b5-59f9-4e03-8bb0-6939d20c77a1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic.SDK" Version="5.5.0" />
     <PackageReference Include="dotenv.net" Version="4.0.0" />
+    <PackageReference Include="GeminiDotnet.Extensions.AI" Version="0.22.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.4.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />

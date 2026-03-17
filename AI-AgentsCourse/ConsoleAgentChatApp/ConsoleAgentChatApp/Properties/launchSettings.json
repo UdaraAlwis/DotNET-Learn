@@ -1,8 +1,19 @@
 {
   "profiles": {
-    "ConsoleAgentChatApp": {
+    "OpenAI": {
       "commandName": "Project",
-      "commandLineArgs": "--provider openai --model gpt-4o-mini"
+      "commandLineArgs": "--provider openai --model gpt-4o-mini",
+      "workingDirectory": "C:\\dev\\GitHub\\DotNET-Learn\\AI-AgentsCourse\\ConsoleAgentChatApp"
+    },
+    "Gemini": {
+      "commandName": "Project",
+      "commandLineArgs": "--provider gemini --model gemini-2.5-flash-lite",
+      "workingDirectory": "C:\\dev\\GitHub\\DotNET-Learn\\AI-AgentsCourse\\ConsoleAgentChatApp"
+    },
+    "Claude": {
+      "commandName": "Project",
+      "commandLineArgs": "--provider claude --model claude-haiku-4-5-20251001",
+      "workingDirectory": "C:\\dev\\GitHub\\DotNET-Learn\\AI-AgentsCourse\\ConsoleAgentChatApp"
     }
   }
 }

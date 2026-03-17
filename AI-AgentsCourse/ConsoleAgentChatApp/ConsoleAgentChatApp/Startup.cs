@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using dotenv.net;
+using GeminiDotnet.Extensions.AI;
+using Anthropic.SDK;
 
 namespace ConsoleAgentChatApp;
 
@@ -19,8 +21,18 @@ public static class Startup
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             var client = provider switch
             {
-                "openai" => new OpenAI.Chat.ChatClient(model, Environment.GetEnvironmentVariable("OPENAI_API_KEY")!).AsIChatClient(),
-                
+                "openai" => new OpenAI.Chat.ChatClient(
+                                model, Environment.GetEnvironmentVariable("OPENAI_API_KEY")!).AsIChatClient(),
+
+                "gemini" => new GeminiChatClient(new GeminiDotnet.GeminiClientOptions() 
+                            { 
+                                ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")!,
+                                ModelId = model,
+                            }),
+                                
+                "claude" => new AnthropicClient(new APIAuthentication(
+                    Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
+
                 _ => throw new ArgumentException($"Provider '{provider}' is not supported.")
             };
 
