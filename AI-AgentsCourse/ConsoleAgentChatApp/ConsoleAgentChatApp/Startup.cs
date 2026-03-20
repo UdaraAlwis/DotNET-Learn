@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using dotenv.net;
 using GeminiDotnet.Extensions.AI;
 using Anthropic.SDK;
+using ConsoleAgentChatApp.Services;
 
 namespace ConsoleAgentChatApp;
 
@@ -49,7 +49,14 @@ public static class Startup
         {
             ModelId = model,
             Temperature = 1,
-            MaxOutputTokens = 5000
+            MaxOutputTokens = 5000,
+            Tools = [.. FunctionRegistry.GetTools(sp)]
+        });
+
+        builder.Services.AddSingleton<WeatherService>(_ =>
+        {
+            var weatherApiKey = Environment.GetEnvironmentVariable("WEATHER_API_DOTCOM_KEY")!;
+            return new WeatherService(weatherApiKey);
         });
     }
 }

@@ -3,7 +3,9 @@
 **Course:** [AI Agents in C#](https://dometrain.com/course/getting-started-ai-agents-in-csharp/)
 
 I undertook this course to learn how to build robust and scalable AI agents using C#. The course covers a wide range of topics, from the basics of setting up an AI agent to advanced concepts like natural language processing, machine learning integration, and agent orchestration.
+
 Towards the end, we explored creating an SDK for the AI agents using Refit.
+
 Finally, we migrated the entire AI agent system to use Minimal APIs.
 
 I followed along with the course instructor, implementing each feature step-by-step. At the same time, I made sure to take notes and note down important code snippets for future reference. I hope this documentation will be helpful for others looking to learn about building AI agents with C#.
@@ -21,6 +23,50 @@ PENDING
 [Microsoft.Extensions.AI](https://www.nuget.org/packages/Microsoft.Extensions.AI)
 
 For ChatGPT, Gemini, and Anthropic, we can use the Microsoft.Extensions.AI library to create simple CLI chat agents.
+
+Define chat options in `Startup.cs`
+
+```csharp
+builder.Services.AddTransient<ChatOptions>(sp => new ChatOptions
+{
+    ModelId = model,
+    Temperature = 1,
+    MaxOutputTokens = 5000,
+});
+```
+
+Define the chat client in `Startup.cs`
+
+```csharp
+builder.Services.AddSingleton<IChatClient>(sp =>
+{
+    var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+    var client = provider switch
+    {
+        "openai" => new OpenAI.Chat.ChatClient(
+                        model, Environment.GetEnvironmentVariable("OPENAI_API_KEY")!).AsIChatClient(),
+
+        "gemini" => new GeminiChatClient(new GeminiDotnet.GeminiClientOptions()
+                    {
+                        ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")!,
+                        ModelId = model,
+                    }),
+
+        "claude" => new AnthropicClient(new APIAuthentication(
+                    Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
+
+        _ => throw new ArgumentException($"Provider '{provider}' is not supported.")
+    };
+
+    return new ChatClientBuilder(client)
+        .UseLogging(loggerFactory)
+        .UseFunctionInvocation(loggerFactory, c =>
+        {
+            c.IncludeDetailedErrors = true;
+        })
+        .Build();
+});
+```
 
 ### OpenAI (ChatGPT)
 
@@ -56,6 +102,79 @@ For ChatGPT, Gemini, and Anthropic, we can use the Microsoft.Extensions.AI libra
             Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
 ```
 
+Below is a screenshot of the simple CLI chat agent:
+
 ![Simple CLI Chat Agent](./Screenshots/1%20Simple%20CLI%20Chat%20agent%20with%20ChatGPT,%20Gemini,%20Anthropic.jpg)
+
+### Tool calling
+
+Implement your service locally `WeatherService.cs`
+
+```csharp
+public class WeatherService (string apiKey)
+{
+    private readonly HttpClient _httpClient = new HttpClient();
+
+    public async Task<string[]> GetWeatherInCity(string city, CancellationToken cancellationToken)
+    {
+        ... implementation to call the weather API and return the weather information for the specified city
+    }
+}
+```
+
+Register the service in your service container
+
+```csharp
+builder.Services.AddSingleton<WeatherService>(_ =>
+{
+    var weatherApiKey = Environment.GetEnvironmentVariable("WEATHER_API_DOTCOM_KEY")!;
+    return new WeatherService(weatherApiKey);
+});
+```
+
+Create Function Registry `FunctionRegistry.cs` to expose the function to the agent
+
+```csharp
+public static class FunctionRegistry
+{
+    public static IEnumerable<AITool> GetTools(this IServiceProvider sp)
+    {
+        var weatherService = sp.GetRequiredService<WeatherService>();
+
+        var getWeatherFn = typeof(WeatherService)
+                                .GetMethod(nameof(WeatherService.GetWeatherInCity),
+                                    [typeof(string), typeof(CancellationToken)])!;
+
+        yield return AIFunctionFactory.Create(
+            getWeatherFn,
+            weatherService,
+            new AIFunctionFactoryOptions
+            {
+                Name = "get_weather",
+                ...
+            });
+    }
+}
+```
+
+Finally, register the tools in the ChatOptions when configuring the agent
+
+```csharp
+builder.Services.AddTransient<ChatOptions>(sp => new ChatOptions
+{
+    ...
+    Tools = [.. FunctionRegistry.GetTools(sp)]
+});
+```
+
+It's a good practice to let the agent know that it can use the provided tools when necessary
+
+```csharp
+new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provided functions when appropriate.")
+```
+
+![Weather Service Tool Call](./Screenshots/2%20Weather%20Service%20Tool%20Call.jpg)
+
+To be continued...
 
 Learning ongoing...

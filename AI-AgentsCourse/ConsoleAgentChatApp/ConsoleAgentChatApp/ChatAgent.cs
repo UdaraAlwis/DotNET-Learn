@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleAgentChatApp
 {
@@ -14,29 +9,34 @@ namespace ConsoleAgentChatApp
         {
             var client = sp.GetRequiredService<IChatClient>();
 
-            var chatOptions =  sp.GetRequiredService<ChatOptions>();
+            var chatOptions = sp.GetRequiredService<ChatOptions>();
 
             var history = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.System, "You are a helpful CLI assistant.")
+                new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provided functions when appropriate.")
             };
 
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Welcome to the Console Agent Chat App! (empty = exit).");
 
             while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ResetColor();
+                Console.WriteLine();
                 var input = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(input))
+                {
+                    Console.ResetColor();
                     break;
-
-                Console.ResetColor();
+                }
 
                 history.Add(new ChatMessage(ChatRole.User, input));
 
                 var response = await client.GetResponseAsync(history, chatOptions);
 
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Assistant: {response.Text}");
                 history.AddRange(response.Messages);
             }
