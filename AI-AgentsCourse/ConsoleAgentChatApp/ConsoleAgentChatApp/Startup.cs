@@ -31,7 +31,7 @@ public static class Startup
                             }),
                                 
                 "claude" => new AnthropicClient(new APIAuthentication(
-                    Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
+                            Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
 
                 _ => throw new ArgumentException($"Provider '{provider}' is not supported.")
             };
