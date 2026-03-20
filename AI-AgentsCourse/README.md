@@ -56,6 +56,6 @@ For ChatGPT, Gemini, and Anthropic, we can use the Microsoft.Extensions.AI libra
             Environment.GetEnvironmentVariable("CLAUDE_API_KEY")!)).Messages,
 ```
 
-![Simple CLI Chat Agent](Screenshots/1 Simple CLI Chat agent with ChatGPT, Gemini, Anthropic.jpg)
+![Simple CLI Chat Agent](./Screenshots/1%20Simple%20CLI%20Chat%20agent%20with%20ChatGPT,%20Gemini,%20Anthropic.jpg)
 
 Learning ongoing...
