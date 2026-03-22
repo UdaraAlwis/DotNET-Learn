@@ -58,5 +58,6 @@ public static class Startup
             var weatherApiKey = Environment.GetEnvironmentVariable("WEATHER_API_DOTCOM_KEY")!;
             return new WeatherService(weatherApiKey);
         });
+        builder.Services.AddSingleton<WardrobeService>();
     }
 }

@@ -22,6 +22,20 @@ namespace ConsoleAgentChatApp
                     Name = "get_weather",
                     Description = "Gets the current weather descriptions in a specified city"
                 });
+
+            var wardrobeService = sp.GetRequiredService<WardrobeService>();
+
+            var getWardrobeFn = typeof(WardrobeService)
+                                    .GetMethod(nameof(WardrobeService.ListClothing), [])!;
+
+            yield return AIFunctionFactory.Create(
+                getWardrobeFn,
+                wardrobeService,
+                new AIFunctionFactoryOptions
+                {
+                    Name = "get_clothing_from_wardrobe",
+                    Description = "Lists all the clothing I have in my wardrobe"
+                });
         }
     }
 }

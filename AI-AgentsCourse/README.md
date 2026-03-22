@@ -175,6 +175,12 @@ new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provi
 
 ![Weather Service Tool Call](./Screenshots/2%20Weather%20Service%20Tool%20Call.jpg)
 
+You can also attach multiple tools to the agent
+
+![3 Weather Service Call with Multiple Tools](./Screenshots/3%20Weather%20Service%20Call%20with%20Multiple%20Tools.jpg)
+
+
+
 To be continued...
 
 Learning ongoing...
