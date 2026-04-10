@@ -49,6 +49,8 @@ namespace ConsoleAgentChatApp
                 if (turnsSinceLastSummary >= SUMMARY_INTERVAL)
                 {
                     var summary = await SummarizeHistory(history, client, chatOptions);
+                    // Replace the history with the summary and the most recent
+                    // system prompt to keep the context window manageable
                     history = [
                         history[0],
                         new ChatMessage(ChatRole.System, summary)

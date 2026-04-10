@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/libman",
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+
+    {
+      "provider": "unpkg",
+      "library": "alpinejs@3.13.10",
+      "files": ["dist/cdn.min.js"],
+      "destination": "wwwroot/lib/alpinejs/"
+    }
+  ]
+}

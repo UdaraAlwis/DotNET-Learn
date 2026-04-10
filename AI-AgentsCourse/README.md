@@ -259,6 +259,15 @@ static async Task<string> SummarizeHistory(List<ChatMessage> history, IChatClien
 
 ![Summarize Chat History](./Screenshots/6%20Summarizing%20session%20memory.jpg)
 
+
+### Caching on the provider
+
+Prompt caching caches provider responses to reduce latency and improve performance for frequently used prompts.
+
+OpenAi, Anthropic, and Gemini providers all support caching, explicit and automatic options.
+
+
+
 To be continued...
 
 Learning ongoing...

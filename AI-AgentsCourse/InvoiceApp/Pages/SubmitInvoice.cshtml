@@ -1,0 +1,41 @@
+@page
+@model SubmitInvoiceModel
+@{
+    ViewData["Title"] = "Submit Invoice";
+}
+
+<div class="flex justify-center py-10">
+    <div class="w-full max-w-xl bg-white shadow-lg rounded-lg p-8">
+        <h2 class="text-2xl font-bold mb-6">Submit Invoice</h2>
+        <form method="post" class="space-y-6">
+            <div>
+                <label asp-for="Invoice.Description" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Invoice.Description" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" />
+                <span asp-validation-for="Invoice.Description" class="text-red-600 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="Invoice.Amount" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Invoice.Amount" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" />
+                <span asp-validation-for="Invoice.Amount" class="text-red-600 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="Invoice.Date" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Invoice.Date" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" type="date" />
+                <span asp-validation-for="Invoice.Date" class="text-red-600 text-sm"></span>
+            </div>
+            
+            <div>
+                <label asp-for="Invoice.Due" class="block mb-1 font-medium text-gray-700"></label>
+                <input asp-for="Invoice.Due" class="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400" type="date" />
+                <span asp-validation-for="Invoice.Due" class="text-red-600 text-sm"></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">Submit</button>
+                <a asp-page="/Invoices" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded shadow">Back to Invoices</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+

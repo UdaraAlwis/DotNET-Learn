@@ -1,0 +1,73 @@
+@page
+@model InvoicesModel
+@{
+    ViewData["Title"] = "Invoices";
+}
+
+<div class="flex justify-center py-10">
+    <div class="w-full max-w-6xl bg-white shadow-lg rounded-lg p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Invoices</h2>
+            <a class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow" asp-page="/SubmitInvoice">Submit New Invoice</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                @foreach (var invoice in Model.Invoices)
+                {
+                    <tr class="hover:bg-blue-50">
+                        <td class="px-6 py-4 whitespace-nowrap">@invoice.Description</td>
+                        <td class="px-6 py-4 whitespace-nowrap">@invoice.Amount.ToString("C")</td>
+                        <td class="px-6 py-4 whitespace-nowrap">@invoice.Date.ToShortDateString()</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+    <input type="checkbox" onchange="markAsPaidOrPending(@invoice.Id, this)" @(invoice.Status == "Paid" ? "checked" : "") />
+<span>@(invoice.Status == "Paid" ? "Paid" : "Pending")</span>
+</td>
+                        <td class="px-6 py-4 whitespace-nowrap">@invoice.Due.ToShortDateString()</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function markAsPaidOrPending(invoiceId, checkbox) {
+    const newStatus = checkbox.checked ? 'Paid' : 'Pending';
+    fetch('/api/invoices/' + invoiceId + '/status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the label next to the checkbox
+            const label = checkbox.nextElementSibling;
+            if (label) {
+                label.textContent = newStatus;
+            }
+        } else {
+            alert('Failed to update status: ' + data.message);
+            // revert checkbox
+            checkbox.checked = !checkbox.checked;
+        }
+    })
+    .catch(err => {
+        alert('Error updating status.');
+        checkbox.checked = !checkbox.checked;
+    });
+}
+</script>
