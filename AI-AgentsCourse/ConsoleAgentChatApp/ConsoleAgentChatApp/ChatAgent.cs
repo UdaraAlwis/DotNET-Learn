@@ -34,6 +34,39 @@ namespace ConsoleAgentChatApp
                     break;
                 }
 
+                if (input == "/history")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Chat History:");
+                    foreach (var item in history)
+                    {
+                        switch (item.Role.Value)
+                        {
+                            case "user":
+                                {
+                                    Console.WriteLine($"USER: {item.Text}");
+                                    continue;
+                                }
+                            case "assistant" when !string.IsNullOrWhiteSpace(item.Text):
+                                {
+                                    Console.WriteLine($"AI: {item.Text}");
+                                    continue;
+                                }
+                            case "assistant" when item.Contents?.Any() ?? false:
+                                {
+                                    Console.WriteLine($"REQUEST: {item.Contents[0].ToString()}");
+                                    continue;
+                                }
+                            case "tool":
+                                {
+                                    Console.WriteLine($"TOOL CALL: {item.Text}");
+                                    continue;
+                                }
+                        }
+                    }
+                    Console.ResetColor();
+                }
+
                 history.Add(new ChatMessage(ChatRole.User, input));
 
                 var response = await client.GetResponseAsync(history, chatOptions);

@@ -211,6 +211,16 @@ Pattern that allows the agent to reason about the world, observe the results of 
 
 ![Reasoning Model Test](./Screenshots/4%20Reasoning%20model%20test.jpg)
 
+### Memory Strategies
+
+- Session Memory: Store the conversation history within the current session. This allows the agent to maintain context and continuity during interactions.
+- Episodic Memory: Store specific events or interactions that the agent can recall later. This is useful for remembering important information or past interactions that may be relevant to future conversations.
+- Semantic Memory: Store information in a structured format that allows the agent to understand and retrieve relevant information based on the meaning and context of the conversation.
+
+Session Memory,
+
+![Session Memory demo](./Screenshots/5%20Session%20memory.jpg)
+
 
 
 To be continued...
