@@ -2,7 +2,7 @@
   "profiles": {
     "OpenAI": {
       "commandName": "Project",
-      "commandLineArgs": "--provider openai --model gpt-4o-mini",
+      "commandLineArgs": "--provider openai --model gpt-5-mini",
       "workingDirectory": "C:\\dev\\GitHub\\DotNET-Learn\\AI-AgentsCourse\\ConsoleAgentChatApp"
     },
     "Gemini": {

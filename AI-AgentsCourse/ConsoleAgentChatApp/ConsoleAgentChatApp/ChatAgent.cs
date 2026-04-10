@@ -13,7 +13,10 @@ namespace ConsoleAgentChatApp
 
             var history = new List<ChatMessage>
             {
-                new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provided functions when appropriate.")
+                new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provided functions when appropriate." +
+                "If a tool call fails due to some invalid arguments, " +
+                "then make an attempt to fix the arguments yourself by using your best judgement, " +
+                "then try calling the tool again.")
             };
 
             Console.ForegroundColor = ConsoleColor.Green;

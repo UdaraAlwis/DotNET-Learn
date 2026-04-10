@@ -59,5 +59,6 @@ public static class Startup
             return new WeatherService(weatherApiKey);
         });
         builder.Services.AddSingleton<WardrobeService>();
+        builder.Services.AddSingleton<EmailService>();
     }
 }

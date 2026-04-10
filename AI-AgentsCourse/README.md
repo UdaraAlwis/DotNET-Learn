@@ -180,6 +180,38 @@ You can also attach multiple tools to the agent
 ![3 Weather Service Call with Multiple Tools](./Screenshots/3%20Weather%20Service%20Call%20with%20Multiple%20Tools.jpg)
 
 
+### Error handling
+
+Agents are smart enough to handle errors gracefully. If a tool call fails, the agent can catch the error and respond accordingly.
+
+Initiate the agent with a system prompt that encourages it to handle errors and attempt to fix them when possible
+
+```csharp
+new ChatMessage(ChatRole.System, "You are a helpful CLI assistant. Use the provided functions when appropriate." +
+"If a tool call fails due to some invalid arguments, " +
+"then make an attempt to fix the arguments yourself by using your best judgement, " +
+"then try calling the tool again.")
+```
+
+For example, if the agent tries to call the `get_weather` function with an invalid city name and receives an error, it can attempt to correct the city name and try calling the function again.
+
+```csharp
+throw new InvalidOperationException("Error calling Weather API: the weather for London is currently unavailable but its probably its probable similr to Cambridge so try that.");
+```
+
+Then it will try calling the function again with the corrected city name "Cambridge".
+
+### ReAct Pattern for Agent Reasoning
+
+- Thought (what do I know about this situation?)
+- Observation (what do I observe from the environment or the results of my actions?)
+- Action (what action should I take based on my thoughts and observations?)
+
+Pattern that allows the agent to reason about the world, observe the results of its actions, and then take further actions based on those observations.
+
+![Reasoning Model Test](./Screenshots/4%20Reasoning%20model%20test.jpg)
+
+
 
 To be continued...
 

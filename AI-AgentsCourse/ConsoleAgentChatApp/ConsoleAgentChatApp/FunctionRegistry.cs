@@ -36,6 +36,21 @@ namespace ConsoleAgentChatApp
                     Name = "get_clothing_from_wardrobe",
                     Description = "Lists all the clothing I have in my wardrobe"
                 });
+
+
+            var emailService = sp.GetRequiredService<EmailService>();
+
+            var emailFriendFn = typeof(EmailService)
+                                    .GetMethod(nameof(EmailService.EmailFrind), [typeof(string), typeof(string)])!;
+
+            yield return AIFunctionFactory.Create(
+                emailFriendFn,
+                emailService,
+                new AIFunctionFactoryOptions
+                {
+                    Name = "email_friend",
+                    Description = "Sends an email to a specified friend with this name"
+                });
         }
     }
 }
