@@ -22,6 +22,9 @@ namespace ConsoleAgentChatApp
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Welcome to the Console Agent Chat App! (empty = exit).");
 
+            int turnsSinceLastSummary = 0;
+            const int SUMMARY_INTERVAL = 5;
+
             while (true)
             {
                 Console.ResetColor();
@@ -34,39 +37,6 @@ namespace ConsoleAgentChatApp
                     break;
                 }
 
-                if (input == "/history")
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Chat History:");
-                    foreach (var item in history)
-                    {
-                        switch (item.Role.Value)
-                        {
-                            case "user":
-                                {
-                                    Console.WriteLine($"USER: {item.Text}");
-                                    continue;
-                                }
-                            case "assistant" when !string.IsNullOrWhiteSpace(item.Text):
-                                {
-                                    Console.WriteLine($"AI: {item.Text}");
-                                    continue;
-                                }
-                            case "assistant" when item.Contents?.Any() ?? false:
-                                {
-                                    Console.WriteLine($"REQUEST: {item.Contents[0].ToString()}");
-                                    continue;
-                                }
-                            case "tool":
-                                {
-                                    Console.WriteLine($"TOOL CALL: {item.Text}");
-                                    continue;
-                                }
-                        }
-                    }
-                    Console.ResetColor();
-                }
-
                 history.Add(new ChatMessage(ChatRole.User, input));
 
                 var response = await client.GetResponseAsync(history, chatOptions);
@@ -75,7 +45,34 @@ namespace ConsoleAgentChatApp
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Assistant: {response.Text}");
                 history.AddRange(response.Messages);
+                turnsSinceLastSummary++;
+                if (turnsSinceLastSummary >= SUMMARY_INTERVAL)
+                {
+                    var summary = await SummarizeHistory(history, client, chatOptions);
+                    history = [
+                        history[0],
+                        new ChatMessage(ChatRole.System, summary)
+                    ];
+                    turnsSinceLastSummary = 0;
+                }
             }
+        }
+
+        static async Task<string> SummarizeHistory(List<ChatMessage> history, IChatClient client, ChatOptions chatOptions)
+        {
+            var summaryPrompt = "Summarize the following conversation in a few sentences: \n\n";
+            foreach (var message in history)
+            {
+                summaryPrompt += $"{message.Role}: {message.Text}\n";
+            }
+
+            var summaryHistory = new List<ChatMessage>
+            {
+                new ChatMessage(ChatRole.System, summaryPrompt),
+            };
+
+            var summaryResponse = await client.GetResponseAsync(summaryPrompt, chatOptions);
+            return summaryResponse.Text;
         }
     }
 }

@@ -221,7 +221,43 @@ Session Memory,
 
 ![Session Memory demo](./Screenshots/5%20Session%20memory.jpg)
 
+Embedding-based Semantic Memory: Means of representing objects like text, images, or other data in a high-dimensional vector space. This allows the agent to understand the semantic meaning of the information and retrieve relevant information based on similarity.
 
+### Summarizing chat history
+
+Between every few interactions, we can summarize the chat history to save on tokens and also to make sure the agent has a concise context of the conversation so far.
+
+```csharp
+...
+var summary = await SummarizeHistory(history, client, chatOptions);
+history = [
+    history[0],
+    new ChatMessage(ChatRole.System, summary)
+];
+```
+
+A simple SummarizeHistory function,
+
+```csharp
+static async Task<string> SummarizeHistory(List<ChatMessage> history, IChatClient client, ChatOptions chatOptions)
+{
+    var summaryPrompt = "Summarize the following conversation in a few sentences: \n\n";
+    foreach (var message in history)
+    {
+        summaryPrompt += $"{message.Role}: {message.Text}\n";
+    }
+
+    var summaryHistory = new List<ChatMessage>
+    {
+        new ChatMessage(ChatRole.System, summaryPrompt),
+    };
+
+    var summaryResponse = await client.GetResponseAsync(summaryPrompt, chatOptions);
+    return summaryResponse.Text;
+}
+```
+
+![Summarize Chat History](./Screenshots/6%20Summarizing%20session%20memory.jpg)
 
 To be continued...
 
