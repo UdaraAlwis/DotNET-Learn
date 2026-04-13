@@ -1,18 +1,7 @@
 // Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
-// Wait for Alpine.js to be available
-document.addEventListener('DOMContentLoaded', function () {
-    // Make sure Alpine is loaded
-    if (typeof Alpine !== 'undefined') {
-        initializeAlpine();
-    } else {
-        // If Alpine isn't loaded yet, wait for it
-        document.addEventListener('alpine:init', initializeAlpine);
-    }
-});
-
-function initializeAlpine() {
+document.addEventListener('alpine:init', () => {
     Alpine.data('chatbot', () => ({
         chatOpen: false,
         messages: [],
@@ -76,6 +65,8 @@ function initializeAlpine() {
                 // Get the assistant's response
                 const assistantMessages = await response.json();
 
+                console.log('Assistant response:', assistantMessages);
+
                 // Add the assistant's response to the chat
                 this.messages.push(...assistantMessages);
             } catch (error) {
@@ -94,4 +85,4 @@ function initializeAlpine() {
             }
         }
     }));
-}
+});

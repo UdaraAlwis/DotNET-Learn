@@ -15,7 +15,21 @@ InvoiceApp is a C# ASP.NET Core web application for submitting and viewing invoi
 cd InvoiceApp
 ```
 
-### 2. Restore Dependencies
+### 2. Install Required CLI Tools
+
+Install the LibMan CLI (required for `libman restore`):
+
+```sh		
+dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+```
+
+> If already installed, you can update it with:
+>
+> ```sh
+> dotnet tool update -g Microsoft.Web.LibraryManager.Cli
+> ```
+
+### 3. Restore Dependencies
 - **.NET dependencies** are restored automatically on build.
 - **Frontend libraries** (Alpine.js) are managed by [LibMan](https://docs.microsoft.com/en-us/aspnet/core/client-side/libman/):
 
@@ -25,19 +39,19 @@ libman restore
 
 > **Note:** `wwwroot/lib` is ignored in `.gitignore` except for a `.gitkeep` and `README.md` file. All library files are restored via LibMan.
 
-### 3. Create The Local Database
+### 4. Create The Local Database
 
 ```sh
 dotnet ef database update
 ```
 
-### 4. Run the Application
+### 5. Run the Application
 ```sh
 dotnet run
 ```
 - The app will start (by default) at: [http://localhost:5000](http://localhost:5000)
 
-### 5. Using the App
+### 6. Using the App
 - Visit the homepage to submit or view invoices.
 - Submitted invoices are stored in a local SQLite database (`Invoices.db`).
 
@@ -45,7 +59,11 @@ dotnet run
 
 * The Agent popup icon does not appear - try refreshing the page a couple of times
 * `SqliteException: SQLite Error 1: 'no such table: Invoices'.` - you need to create the local database file, run `dotnet ef database update`
+* `'libman' is not recognized as an internal or external command` - install the LibMan CLI:
 
+  ```sh
+  dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+  ```
 
 ## Project Structure
 - `Pages/` - Razor pages for UI

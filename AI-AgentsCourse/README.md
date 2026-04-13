@@ -259,13 +259,91 @@ static async Task<string> SummarizeHistory(List<ChatMessage> history, IChatClien
 
 ![Summarize Chat History](./Screenshots/6%20Summarizing%20session%20memory.jpg)
 
-
 ### Caching on the provider
 
 Prompt caching caches provider responses to reduce latency and improve performance for frequently used prompts.
 
 OpenAi, Anthropic, and Gemini providers all support caching, explicit and automatic options.
 
+
+### InvoiceApp Chat Agent
+
+- Create an InvoiceAgentApi in Visual Studio with .NET 8
+
+- Create endpoint for client app
+
+```csharp
+app.MapPost("/chat", async (
+    List<ChatMessage> messages,
+    IChatClient client,
+    ChatOptions chatOptions) =>
+{
+    var systemPromptWithDate = systemPrompt + "\n By the way, today's date is " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".";
+
+    var withSystemPrompt = (new [] { new ChatMessage(ChatRole.System, systemPromptWithDate) })
+                                .Concat(messages).ToList();
+
+    var response = await client.GetResponseAsync(withSystemPrompt, chatOptions);
+    return Results.Ok(response.Messages);
+});
+```
+
+- In Startup.cs, configure the chat client and options 
+
+```csharp
+builder.Services.AddSingleton<IChatClient>(sp =>
+{
+    var logger = sp.GetRequiredService<ILoggerFactory>();
+    
+    var client = provider switch
+    {
+        ...
+    };
+
+    return new ChatClientBuilder(client)
+        .UseLogging(logger)
+        .UseFunctionInvocation(logger, c =>
+        {
+            c.IncludeDetailedErrors = true;
+        })
+        .Build(sp);
+});
+```
+
+```csharp
+builder.Services.AddTransient<ChatOptions>(sp => new ChatOptions
+{
+    Tools = [.. FunctionRegistry.GetTools(sp)],
+    ...
+});
+```
+
+- Create a `InvoiceApiClient` that calls the Invoice API DB and exposes functions like `ListInvoices`, `FindInvoiceByName`, etc.
+
+- Register that in the `FunctionRegistry` to expose those functions to the agent
+
+```csharp
+yield return AIFunctionFactory.Create(
+    typeof(InvoiceApiClient).GetMethod(nameof(InvoiceApiClient.ListInvoices), 
+    ...
+    new AIFunctionFactoryOptions
+    {
+        Name = "list_invoices",
+        ...
+    });
+
+yield return AIFunctionFactory.Create(
+    typeof(InvoiceApiClient).GetMethod(nameof(InvoiceApiClient.FindInvoiceByName),
+    [typeof(string)])!,
+    apiClient,
+    new AIFunctionFactoryOptions
+    {
+        Name = "find_invoice_by_name",
+        ...
+    });
+```
+
+![InvoiceApp Chat Agent](./Screenshots/7%20InvoiceApp%20Chat%20agent.jpg)
 
 
 To be continued...

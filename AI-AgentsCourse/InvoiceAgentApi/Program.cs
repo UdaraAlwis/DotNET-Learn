@@ -1,4 +1,6 @@
 using dotenv.net;
+using InvoiceAgentApi;
+using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,3 +49,27 @@ for (int i = 0; i < args.Length; i++)
         model = args[i + 1].ToLower();
 }
 
+Startup.ConfigureServices(builder, provider, model);
+
+var systemPromptPath = Path.Combine(AppContext.BaseDirectory, "SystemPrompt.txt");
+var systemPrompt = File.ReadAllText(systemPromptPath);
+
+var app = builder.Build();
+
+app.UseCors("AllowLocalhost");
+
+app.MapPost("/chat", async (
+    List<ChatMessage> messages,
+    IChatClient client,
+    ChatOptions chatOptions) =>
+{
+    var systemPromptWithDate = systemPrompt + "\n By the way, today's date is " + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".";
+
+    var withSystemPrompt = (new [] { new ChatMessage(ChatRole.System, systemPromptWithDate) })
+                                .Concat(messages).ToList();
+
+    var response = await client.GetResponseAsync(withSystemPrompt, chatOptions);
+    return Results.Ok(response.Messages);
+});
+
+app.Run();

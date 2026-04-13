@@ -30,9 +30,9 @@
         &copy; 2025 - InvoiceApp - <a asp-area="" asp-page="/Privacy" class="underline">Privacy</a>
     </footer>
 
-    <!-- Alpine.js and site scripts -->
-    <script src="~/lib/alpinejs/dist/cdn.min.js"></script>
+    <!-- Site scripts must load before Alpine so alpine:init listener is registered in time -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script defer src="~/lib/alpinejs/dist/cdn.min.js"></script>
 
     <!-- Chatbot Component -->
     <div id="chatbot" x-data="chatbot" class="fixed bottom-4 right-4 z-50">
