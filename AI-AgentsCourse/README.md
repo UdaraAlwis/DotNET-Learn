@@ -270,6 +270,31 @@ OpenAi, Anthropic, and Gemini providers all support caching, explicit and automa
 
 - Create an InvoiceAgentApi in Visual Studio with .NET 8
 
+- Create a system prompt that defines the agent's behavior and capabilities. Make sure to read it and initialize the agent with it when it starts up.
+
+SystemPrompt.txt
+
+```
+You are an agent that controls an invoicing platform called 'InvoiceApp' and also provides assistance on how to use the platform.
+
+The platform stores invoices in various states (Pending, Paid etc) and can perform actions directly on the platform such as
+
+* Creating a new invoice
+* Searching for an invoice by name
+* Marking an invoice as paid
+
+General guidance
+
+* Give the user general advice on managing invoices
+* You can read their invoices using the available tools
+* When writing messages back keep them short and to the point
+```
+
+```csharp
+var systemPromptPath = Path.Combine(AppContext.BaseDirectory, "SystemPrompt.txt");
+var systemPrompt = File.ReadAllText(systemPromptPath);
+```
+
 - Create endpoint for client app
 
 ```csharp
@@ -345,6 +370,70 @@ yield return AIFunctionFactory.Create(
 
 ![InvoiceApp Chat Agent](./Screenshots/7%20InvoiceApp%20Chat%20agent.jpg)
 
+### RAG - Retrieval Augmented Generation (RAG) 
+
+This is a technique that combines retrieval-based methods with generative models to improve the quality and relevance of generated responses. 
+In a RAG system, the agent retrieves relevant information from a knowledge base or external sources and then uses that information to generate more accurate and contextually appropriate responses.
+
+### Knowledge Bases (Simpler alternative to vector databases)
+
+Put the .md files into a folder and allow the agent to read and retrieve information from those files when needed. 
+This is a simpler alternative to setting up a vector database for retrieval.
+
+Create the "Docs" folder with .md files
+
+Then create a 'DocumentationClient' that reads the .md files and exposes a function to retrieve relevant information based on a query.
+
+```csharp
+public class DocumentationClient
+{
+    private readonly string _docsDirectory;
+
+    public DocumentationClient()
+    {
+        _docsDirectory = Path.Combine(AppContext.BaseDirectory, "Docs");
+    }
+
+    public string? GetDocumentationPage(string pageName)
+    {
+        ...
+
+        return File.ReadAllText(filePath);
+    }
+}
+```
+
+Register that as a tool in the `FunctionRegistry`
+
+```csharp
+var docService = sp.GetRequiredService<DocumentationClient>();
+
+yield return AIFunctionFactory.Create(typeof(DocumentationClient).GetMethod(nameof(DocumentationClient.GetDocumentationPage),
+    [typeof(string)])!,
+    docService,
+    new AIFunctionFactoryOptions
+    {
+        Name = "read_documentation_page",
+        Description = "Retrieves the contents of this page in the documentation"
+    });
+```
+
+Update the `SystemPrompt.txt` to let the agent know it can use the documentation client to read the docs when needed
+
+```
+...
+If you need to provide assistance to the user to help them use the UI themselves,
+There are four pages of documentation for this platform.
+You can retrieve any page by using the read_documentation_page tool
+
+* "getting-started" - a basic overview of the platform and how to use it
+* "viewing-invoices" - how to view invoices on the platform"
+* "creating-invoices" - how t create invoices on the platform
+* "managing-invoices" - how to manage invoices on the platform
+...
+```
+
+![Knowledge Base Demo](./Screenshots/8%20InvoiceApp%20Chat%20agent%20with%20Knowledge%20base.jpg)
 
 To be continued...
 

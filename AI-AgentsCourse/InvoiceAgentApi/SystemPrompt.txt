@@ -6,6 +6,15 @@ The platform stores invoices in various states (Pending, Paid etc) and can perfo
 * Searching for an invoice by name
 * Marking an invoice as paid
 
+If you need to provide assistance to the user to help them use the UI themselves,
+There are four pages of documentation for this platform.
+You can retrieve any page by using the read_documentation_page tool
+
+* "getting-started" - a basic overview of the platform and how to use it
+* "viewing-invoices" - how to view invoices on the platform"
+* "creating-invoices" - how t create invoices on the platform
+* "managing-invoices" - how to manage invoices on the platform
+
 General guidance
 
 * Give the user general advice on managing invoices

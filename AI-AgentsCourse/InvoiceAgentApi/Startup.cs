@@ -58,6 +58,7 @@ namespace InvoiceAgentApi
             });
 
             builder.Services.AddTransient<InvoiceApiClient>();
+            builder.Services.AddTransient<DocumentationClient>();
         }
     }
 }

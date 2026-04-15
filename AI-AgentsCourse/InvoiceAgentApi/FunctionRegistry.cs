@@ -7,6 +7,17 @@ namespace InvoiceAgentApi
     {
         public static IEnumerable<AITool> GetTools(IServiceProvider sp)
         {
+            var docService = sp.GetRequiredService<DocumentationClient>();
+
+            yield return AIFunctionFactory.Create(typeof(DocumentationClient).GetMethod(nameof(DocumentationClient.GetDocumentationPage),
+               [typeof(string)])!,
+               docService,
+               new AIFunctionFactoryOptions
+               {
+                   Name = "read_documentation_page",
+                   Description = "Retrieves the contents of this page in the documentation"
+               });
+
             var apiClient = sp.GetRequiredService<InvoiceApiClient>();
 
             yield return AIFunctionFactory.Create(typeof(InvoiceApiClient).GetMethod(nameof(InvoiceApiClient.ListInvoices), 
