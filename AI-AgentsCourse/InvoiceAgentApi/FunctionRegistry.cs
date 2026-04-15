@@ -1,4 +1,5 @@
-﻿using InvoiceAgentApi.Services;
+﻿using InvoiceAgentApi.Models;
+using InvoiceAgentApi.Services;
 using Microsoft.Extensions.AI;
 
 namespace InvoiceAgentApi
@@ -36,6 +37,24 @@ namespace InvoiceAgentApi
                 {
                     Name = "find_invoice_by_name",
                     Description = "Finds the invoice with this name"
+                });
+
+            yield return AIFunctionFactory.Create(typeof(InvoiceApiClient).GetMethod(nameof(InvoiceApiClient.CreateInvoice),
+                [typeof(CreateInvoiceRequest)])!,
+                apiClient,
+                new AIFunctionFactoryOptions
+                {
+                    Name = "create_invoice",
+                    Description = "Creates an invoice and returns the new invoice object"
+                });
+
+            yield return AIFunctionFactory.Create(typeof(InvoiceApiClient).GetMethod(nameof(InvoiceApiClient.MarkAsPaid),
+                [typeof(int)])!,
+                apiClient,
+                new AIFunctionFactoryOptions
+                {
+                    Name = "mark_as_paid",
+                    Description = "Marks an invoice as paid"
                 });
         }
     }

@@ -435,6 +435,44 @@ You can retrieve any page by using the read_documentation_page tool
 
 ![Knowledge Base Demo](./Screenshots/8%20InvoiceApp%20Chat%20agent%20with%20Knowledge%20base.jpg)
 
-To be continued...
+Adding create and update status functionalities to the agent,
 
-Learning ongoing...
+```csharp
+public async Task<Invoice> CreateInvoice(CreateInvoiceRequest request)
+{
+    var newInvoice = new Invoice
+    {
+        Description = request.Description,
+        Amount = request.Amount,
+        Due = request.DueDate ?? DateTime.UtcNow.AddDays(30),
+        Date = DateTime.UtcNow,
+        Status = "Pending"
+    };
+
+    ... make the API call to create the invoice and return the created invoice
+}
+```     
+
+```csharp
+public async Task MarkAsPaid(int invoiceId)
+{
+    var request = new UpdateInvoiceRequest
+    {
+        Status = "Paid"
+    };
+
+    ... make the API call to update the invoice status
+}
+```
+
+Register those in the `FunctionRegistry` as well
+
+![Create and Update Invoice Demo](./Screenshots/9%20InvoiceApp%20Chat%20agent%20with%20actionable%20functionality.jpg)
+
+![Create and Update Invoice Demo](./Screenshots/10%20InvoiceApp%20Chat%20agent%20with%20actionable%20functionality.jpg)
+
+---
+
+**To be continued...**
+
+*Learning ongoing...*
