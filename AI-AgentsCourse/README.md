@@ -471,6 +471,90 @@ Register those in the `FunctionRegistry` as well
 
 ![Create and Update Invoice Demo](./Screenshots/10%20InvoiceApp%20Chat%20agent%20with%20actionable%20functionality.jpg)
 
+
+### MCP - Model Context Protocol
+
+MCP is a protocol that allows agents to share information and context with each other. 
+
+This enables complex interactions and collaborations between agents such as sharing knowledge and capabilities to achieve their goals.
+
+Core building blocks of MCP include:
+- Tools - capabilities that an agent can use to perform specific actions or retrieve information.
+- Resources - information or data that an agent can access or manipulate.
+- Prompts - instructions or messages that guide the agent's behavior and decision-making process, such as starter prompts, system prompts, or user prompts.
+
+Transports - the means by which agents communicate and exchange information with each other, such as HTTP, WebSockets, or message queues.
+
+- stdio - local communication via standard input/output streams.
+- Streamable HTTP - HTTP transport with data streaming support.
+
+MCP Server in .NET,
+
+Create a simple Console app with `ModelContextProtocol` package and `ModelContextProtocol.AspNetCore` package for creating the MCP server.
+
+Add MCP server to the service container
+
+```csharp
+builder.Services
+    .AddMcpServer()           // Register MCP server
+    .WithHttpTransport()      // Enable HTTP transport for communication
+    .WithToolsFromAssembly(); // Auto-register tools from the assembly
+
+...
+
+app.MapMcp(); // Map MCP endpoints to the app
+```
+
+Bring in the `InvoiceApiClient` and register it as a tool resource in the MCP server
+
+Create your MCP tools with it,
+
+```csharp
+[McpServerToolType]
+public static class McpTools
+{
+    [McpServerTool, Description("Retrieves a list of all invoices in the InvoiceApp")]
+    public static Task<List<Invoice>> ListInvoices(InvoiceApiClient client)
+    {
+        return client.ListInvoices();
+    }
+
+    ...
+}
+```
+
+![MCP Server Demo](./Screenshots/11%20Simple%20MCP%20Server%20for%20InvoiceApp%20Agent.jpg)
+
+Install ModelContextProtocol.Inspector tool to inspect and debug the MCP server and the agents connected to it.
+
+[ModelContextProtocol.Inspector](https://github.com/modelcontextprotocol/inspector)
+
+In Windows step by step guide to install and run the inspector
+
+```powershell
+PS node -v
+PS git --version
+PS git clone https://github.com/modelcontextprotocol/inspector.git
+PS cd inspector
+PS npm install
+PS npm run
+PS npm run dev
+```
+
+This will run the inspector and connect to your MCP server using Streamable HTTP transport.
+
+![MCP Inspector connected to the MCP Server](./Screenshots/12%20MCP%20Inspector%20connected%20to%20my%20MCP%20Server.jpg)
+
+![MCP Inspector listing the tools available](./Screenshots/13%20MCP%20Inspector%20List%20Tools.jpg)
+
+![MCP Inspector calling the tools available through MCP Server](./Screenshots/14%20MCP%20Inspector%20List%20Tool%20calling%20through%20MCP%20Server.jpg)
+
+
+```
+PS npm start
+```
+
+
 ---
 
 **To be continued...**
