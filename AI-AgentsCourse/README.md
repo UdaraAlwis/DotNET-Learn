@@ -549,11 +549,42 @@ This will run the inspector and connect to your MCP server using Streamable HTTP
 
 ![MCP Inspector calling the tools available through MCP Server](./Screenshots/14%20MCP%20Inspector%20List%20Tool%20calling%20through%20MCP%20Server.jpg)
 
-
 ```
 PS npm start
 ```
 
+### MCP User Prompts
+
+User prompts guide what actions an agent can perform with the MCP server.
+
+Adding User Prompts to MCP server
+
+### Adding User Prompts to MCP Server
+
+In `Program.cs` add the `WithPromptsFromAssembly()` method:
+
+```csharp
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithToolsFromAssembly()
+    .WithPromptsFromAssembly();
+```
+
+Create a new `McpPrompts` class and use the `[McpServerPromptType]` attribute:
+
+```csharp
+[McpServerPromptType]
+public static class McpPrompts
+{
+    [McpServerPrompt, Description("Creates a prompt to pay an invoice")]
+    public static ChatMessage PayInvoicePrompt(
+        [Description("The name of the invoice to mark as paid")] string invoiceName)
+        => new ChatMessage(ChatRole.User, $"Find the invoice \"{invoiceName}\" and mark it as paid.");
+}
+```
+
+![MCP inspector calling the user prompts available](/.Screenshots/15%20MCP%20Server%20User%20Prompts.jpg)
 
 ---
 
