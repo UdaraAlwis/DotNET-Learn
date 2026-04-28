@@ -9,7 +9,8 @@ builder.Services
     .AddMcpServer()
     .WithHttpTransport()
     .WithToolsFromAssembly()
-    .WithPromptsFromAssembly();
+    .WithPromptsFromAssembly()
+    .WithResourcesFromAssembly();
 
 builder.WebHost.UseUrls("http://localhost:5050");
 

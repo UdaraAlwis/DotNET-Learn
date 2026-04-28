@@ -13,4 +13,19 @@
 		<PackageReference Include="ModelContextProtocol" Version="1.2.0" />
 		<PackageReference Include="ModelContextProtocol.AspNetCore" Version="1.2.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Docs\creating-invoice.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Docs\getting-started.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Docs\managing-invoices.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Docs\viewing-invoices.md">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 </Project>

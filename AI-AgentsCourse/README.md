@@ -557,17 +557,15 @@ PS npm start
 
 User prompts guide what actions an agent can perform with the MCP server.
 
-Adding User Prompts to MCP server
-
 ### Adding User Prompts to MCP Server
+
+So now in our MCP Server, we're gonna expose default available User Prompts to the clients (any other service or LLM that connects).
 
 In `Program.cs` add the `WithPromptsFromAssembly()` method:
 
 ```csharp
 builder.Services
-    .AddMcpServer()
-    .WithHttpTransport()
-    .WithToolsFromAssembly()
+    ...
     .WithPromptsFromAssembly();
 ```
 
@@ -584,7 +582,41 @@ public static class McpPrompts
 }
 ```
 
-![MCP inspector calling the user prompts available](/.Screenshots/15%20MCP%20Server%20User%20Prompts.jpg)
+![MCP inspector calling the user prompts available](./Screenshots/15%20MCP%20Server%20User%20Prompts.jpg)
+
+### MCP Resources
+
+Provide context and reusable information that agents can reference when executing tasks. ex: Documentation, DB Schema
+
+### Adding Resources to MCP Server
+
+Our MCP server already has documentation, we're gonna expose that to the clients (any other service or LLM that connects).
+
+In `Program.cs` add the `WithResourcesFromAssembly()` method:
+
+```csharp
+builder.Services
+    ...
+    .WithResourcesFromAssembly();
+```
+
+Create a new `McpResources` class and use the `[McpServerResourceType]` attribute:
+
+```csharp
+[McpServerResourceType]
+public static class McpResources
+{
+    [McpServerResource(MimeType = "text/markdown"), Description("Document describing how to use the InvoiceApp platform")]
+    public static string GetDocumentationMarkdown()
+    {
+        return File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Docs", "getting-started.md"));
+    }
+}
+```
+
+![MCP inspector calling the Resources available](./Screenshots/16%20MCP%20Server%20Resources.jpg)
+
+
 
 ---
 
