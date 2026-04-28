@@ -617,6 +617,43 @@ public static class McpResources
 ![MCP inspector calling the Resources available](./Screenshots/16%20MCP%20Server%20Resources.jpg)
 
 
+### Using our MCP Server from a MCP Client (any LLM Client)
+
+Deploy your MCP Server to the web with an HTTPS certificate and use it in any MCP Client (any LLM).
+
+#### Exposing localhost to the Internet
+
+For this course, we'll use [localhost.run](https://localhost.run/) to forward our localhost port to the internet. This service exposes a process on localhost to the internet and provides a temporary URL with a valid HTTPS certificate.
+
+**Steps:**
+
+1. Ensure your MCP server is running on localhost (e.g., port 5050)
+
+2. Run the following command to expose it:
+   ```bash
+   ssh -R 80:localhost:5050 -o StrictHostKeyChecking=no nokey@localhost.run
+   ```
+
+3. localhost.run will provide you with a public URL in the format:
+   ```
+   https://<RANDOMALPHANUMERIC>.lhr.life
+   ```
+
+4. Use this URL in your MCP Client configuration
+
+![Expose local MCP Server to internet](./Screenshots/17%20Expose%20local%20MCP%20Server%20to%20internet.jpg)
+
+Add the generated https://<RANDOMALPHANUMERIC>.lhr.life local MCP Server linked service to the choice of your LLM or any MCP Client (ex: Claud.ai)
+
+![Add the MCP server to a LLM Client](./Screenshots/18%20Add%20the%20MCP%20server%20to%20a%20LLM%20Client.jpg)
+
+Interact with the MCP Server such as "What can it do?",
+
+![Call the MCP Server through the LLM Client](./Screenshots/19%20Call%20the%20MCP%20Server%20through%20the%20LLM%20Client.jpg)
+
+Invoke tools of the MCP server such as "How many invoices do I have?",
+
+![Call the tools of the MCP Server through the LLM Client](./Screenshots/20%20Call%20the%20tools%20of%20the%20MCP%20Server%20through%20the%20LLM%20Client.jpg)
 
 ---
 

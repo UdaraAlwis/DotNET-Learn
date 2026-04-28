@@ -8,8 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddMcpServer()
     .WithHttpTransport()
+    // Set up MCP Tools
     .WithToolsFromAssembly()
+    // Set up MCP Prompts
     .WithPromptsFromAssembly()
+    // Set up MCP Resources
     .WithResourcesFromAssembly();
 
 builder.WebHost.UseUrls("http://localhost:5050");
