@@ -657,6 +657,8 @@ Invoke tools of the MCP server such as "How many invoices do I have?",
 
 ---
 
-**To be continued...**
+That's the end of the AI Agents in C# course!
 
-*Learning ongoing...*
+![Course Completion Certificate](Screenshots/21%20certificate-qRW1lO8RcMNrHa.png)
+
+Cheers!
