@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option csharp_namespace = "Basics";
+
+package basics;
+
+message Request {
+	string content = 1;
+}
+
+message Response {
+	string message = 2;
+}
+
+service FirstServiceDefinition {
+	rpc Unary(Request) returns (Response);
+	rpc ClientStream (stream Request) returns (Response);
+	rpc ServerStream (Request) returns (stream Response);
+	rpc BiDirectionalStream (stream Request) returns (stream Response);
+}
