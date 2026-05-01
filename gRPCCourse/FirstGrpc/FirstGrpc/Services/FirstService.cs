@@ -32,6 +32,15 @@ namespace FirstGrpc.Services
 
         public override async Task ServerStream(Request request, IServerStreamWriter<Response> responseStream, ServerCallContext context)
         {
+            var headerFirst = context.RequestHeaders.Get("my-first-key");
+            var headerSecond = context.RequestHeaders.Get("my-second-key");
+
+            Console.WriteLine($"Received headers from Client: {headerFirst!.Value }");
+            Console.WriteLine($"Received headers from Client: {headerSecond!.Value }");
+
+            var myTrailer = new Metadata.Entry("my-trailer-key", "my-trailer-value");
+            context.ResponseTrailers.Add(myTrailer);
+
             for (int i = 0; i < 100; i++)
             {
                 if (context.CancellationToken.IsCancellationRequested)

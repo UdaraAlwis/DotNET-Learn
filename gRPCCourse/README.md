@@ -407,6 +407,82 @@ public class HomeController (FirstServiceDefinition.FirstServiceDefinitionClient
 
 ![Connect MVC Client app for Grpc Service](./Screenshots/4%20Connect%20MVC%20Client%20app%20for%20Grpc%20Service.jpg)
 
+## Http Request and Response in gRPC
+
+Request,
+Inside a HTTP request body we can have a single or multiple, stream of gRPC messages, depending on the method type (unary, client streaming, server streaming, bidirectional streaming). 
+
+There are two parts to the gRPC message format,
+- the header/metadata which contains information about the message, such as content type, encoding, and any custom metadata fields
+- body which contains the actual message data.
+
+On the client side we can attach headers/metadata to the gRPC call, using the `Metadata` object. For example:
+```csharp
+var metadata = new Metadata();
+metadata.Add("my-first-key", "my-first-value");
+metadata.Add("my-second-key", "my-second-value");
+
+using var streamingCall = client.ServerStream(new Request() { Content = "Hello" }, metadata);
+```
+
+Then you can access the metadata on the server side using the `ServerCallContext` object. For example:
+```csharp
+public override async Task ServerStream(Request request, IServerStreamWriter<Response> responseStream, ServerCallContext context)
+{
+    var headerFirst = context.RequestHeaders.Get("my-first-key");
+    var headerSecond = context.RequestHeaders.Get("my-second-key");
+
+    Console.WriteLine($"Received headers from Client: {headerFirst!.Value }");
+    Console.WriteLine($"Received headers from Client: {headerSecond!.Value }");
+
+    ... // Handle server streaming logic here
+}
+```
+
+Response and Trailers,
+Inside a HTTP response body we can have a single or multiple, stream of gRPC messages same as the request, depending on the method type.
+
+At the end of the response, there are Trailers, which are sent after all the grpc messages have been sent. Trailers contain additional metadata about the response, such as status codes, error messages, and any custom metadata fields.
+
+On the server side, you can set trailers using the `ServerCallContext` object. For example:
+```csharp
+public override async Task ServerStream(Request request, IServerStreamWriter<Response> responseStream, ServerCallContext context)
+{
+    var myTrailer = new Metadata.Entry("my-trailer-key", "my-trailer-value");
+    context.ResponseTrailers.Add(myTrailer);
+    ... // Handle server streaming logic here
+}
+```
+
+Then you can access the trailers on the client side after the call has completed. For example:
+```csharp
+async void ServerStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
+{
+    ... // Call the ServerStream method and handle the response stream
+
+    var myTrailer = streamingCall.GetTrailers().Get("my-trailer-key");
+    Console.WriteLine($"Received trailer from Server: {myTrailer?.Value}");
+}
+```
+
+Status Codes,
+gRPC uses a set of standard status codes to indicate the outcome of a gRPC call that are different from HTTP status codes. These status codes are sent in the trailers of the HTTP response.
+```csharp
+try
+{
+    ... // Call a gRPC method that may throw an exception or return an error status code
+    
+    var status = streamingCall.GetStatus();
+    Console.WriteLine($"Call status: {status.StatusCode}");
+}
+catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
+{
+    Console.WriteLine("Call was cancelled.");
+}
+```
+
+![Handling Metadata, Trailers and Status Codes](./Screenshots/5%20Handling%20metadata%20and%20trailers%20and%20status%20codes.jpg)
+
 
 TBC!
 

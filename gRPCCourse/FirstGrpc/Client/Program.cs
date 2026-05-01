@@ -44,17 +44,35 @@ async void ClientStreaming(FirstServiceDefinition.FirstServiceDefinitionClient c
 async void ServerStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
 {
     var cancellationToken = new CancellationTokenSource();
-    using var streamingCall = client.ServerStream(new Request() { Content = "Hello" });
 
-    await foreach (var response in streamingCall.ResponseStream.ReadAllAsync(cancellationToken.Token))
+    var metadata = new Metadata();
+    metadata.Add("my-first-key", "my-first-value");
+    metadata.Add("my-second-key", "my-second-value");
+
+    try
     {
-        Console.WriteLine($"Response from Server: {response}");
+        using var streamingCall = client.ServerStream(new Request() { Content = "Hello" }, metadata);
 
-        //Simulate cancellation when the message contains "2"
-        if (response.Message.Contains("2"))
+        await foreach (var response in streamingCall.ResponseStream.ReadAllAsync(cancellationToken.Token))
         {
-            cancellationToken.Cancel();
+            Console.WriteLine($"Response from Server: {response}");
+
+            //Simulate cancellation when the message contains "2"
+            //if (response.Message.Contains("2"))
+            //{
+            //    cancellationToken.Cancel();
+            //}
         }
+
+        var myTrailer = streamingCall.GetTrailers().Get("my-trailer-key");
+        Console.WriteLine($"Received trailer from Server: {myTrailer?.Value}");
+
+        var status = streamingCall.GetStatus();
+        Console.WriteLine($"Call status: {status.StatusCode}");
+    }
+    catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
+    {
+        Console.WriteLine("Call was cancelled.");
     }
 }
 
