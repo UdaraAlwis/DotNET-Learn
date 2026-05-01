@@ -203,6 +203,11 @@ message Person {
 
 In every case, the client initiates the call and the server responds. The difference is in how many messages are sent and received in each direction.
 
+## Grpc Channel
+
+The abstraction for a connection to a gRPC service. It manages the underlying HTTP/2 connection and allows you to create gRPC clients that can call methods on the server. 
+Once you have created a channel, you can use it to make several gRPC calls to the same server, which can improve performance by reusing the connection.
+
 ## First GRPC Service
 
 Create a new ASP.NET Core gRPC service project in Visual Studio. 
@@ -319,7 +324,26 @@ In the csproj file, you should see something like this:
 </Project>
 ```
 
+Then in the `Program.cs` file of the client project, you can create a gRPC channel to connect to the server and create a client instance to call the service methods. For example:
+```csharp
+var options = new GrpcChannelOptions
+{
+    ... // Configure channel options if needed, such as credentials, timeouts, etc.
+};
 
+using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
+var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
+
+Unary(client);
+Console.ReadLine();
+
+void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
+{
+    ... // Call the Unary method and handle the response
+}
+```
+
+![Running Client for Grpc Service](./Screenshots/3%20Running%20Client%20with%20for%20Grpc%20Service.jpg)
 
 
 TBC!
