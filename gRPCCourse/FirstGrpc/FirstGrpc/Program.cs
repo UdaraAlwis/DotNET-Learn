@@ -1,5 +1,6 @@
 using FirstGrpc.Interceptors;
 using FirstGrpc.Services;
+using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddGrpc(option =>
 {
     option.Interceptors.Add<ServerLoggingInterceptor>();
+    option.ResponseCompressionAlgorithm = "gzip";
+    option.ResponseCompressionLevel = CompressionLevel.SmallestSize;
 });
 
 var app = builder.Build();

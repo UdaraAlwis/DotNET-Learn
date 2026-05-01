@@ -579,6 +579,49 @@ builder.Services.AddGrpc(option =>
 
 ![Client and Server Interceptors](./Screenshots/6%20Client%20and%20Server%20Interceptors.jpg)
 
+## Compression
+
+We can modify the compression settings for gRPC calls to optimize performance.
+gRPC supports several compression algorithms, such as gzip, deflate, and snappy.
+
+On the server side, you can enable compression for responses by setting the `ResponseCompressionAlgorithm` property in the gRPC service configuration. For example:
+```csharp
+builder.Services.AddGrpc(options =>
+{
+    ...
+    option.ResponseCompressionAlgorithm = "gzip";
+    option.ResponseCompressionLevel = CompressionLevel.SmallestSize;
+});
+```
+
+Then in the client side, you can enable compression for your request by adding the metadata header `grpc-accept-encoding` with the value of the desired compression algorithm. For example:
+```csharp
+var metadata = new Metadata { { "grpc-accept-encoding", "gzip" } };
+
+var request = new Request() { Content = "Hello" };
+var response = client.Unary(request, deadline: DateTime.UtcNow.AddSeconds(3), headers: metadata);
+```
+
+![Configuring Compression](./Screenshots/7%20Configuring%20Compression.jpg)
+
+### Disable Compression for specific calls
+
+You can disable compression for specific gRPC endpoints in the server by setting the `WriteOptions` on the `ServerCallContext` to `WriteFlags.NoCompress`. For example:
+```csharp
+public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase
+{
+    public override Task<Response> Unary(Request request, ServerCallContext context)
+    {
+        context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
+        ... // Handle unary logic here
+    }
+}
+```
+
+
+
+
+
 
 
 TBC!

@@ -12,17 +12,19 @@ var options = new GrpcChannelOptions
 using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 
-// Unary(client);
+Unary(client);
 // ClientStreaming(client);
-ServerStreaming(client);
+// ServerStreaming(client);
 // BiDirectionalStreaming(client);
 
 Console.ReadLine();
 
 void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
 {
+    var metadata = new Metadata { { "grpc-accept-encoding", "gzip" } };
+
     var request = new Request() { Content = "Hello" };
-    var response = client.Unary(request, deadline: DateTime.UtcNow.AddMilliseconds(3));
+    var response = client.Unary(request, deadline: DateTime.UtcNow.AddSeconds(3), headers: metadata);
     Console.WriteLine($"Response from Server: {response}");
 }
 

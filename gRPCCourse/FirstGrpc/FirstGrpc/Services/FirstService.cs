@@ -7,6 +7,10 @@ namespace FirstGrpc.Services
     {
         public override Task<Response> Unary(Request request, ServerCallContext context)
         {
+            // To disable compression for this response,
+            // we can set the WriteOptions in the ServerCallContext to NoCompress.
+            context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
+
             var response = new Response
             {
                 Message = request.Content + ", I got your message!"
