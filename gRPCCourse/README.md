@@ -618,8 +618,18 @@ public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase
 }
 ```
 
+## Client Side load balancing
+
+We can configure client-side load balancing in gRPC by providing a list of server addresses to the gRPC channel and using a load balancing policy to distribute requests across those servers.
 
 
+
+Testing, spin up two instances of the gRPC server on different ports, for example:
+
+dotnet run --urls="http://localhost:5057"
+dotnet run --urls="http://localhost:5058"
+
+![Client Side Load Balancing](./Screenshots/8%20Client%20Side%20Load%20Balancing.jpg)
 
 
 

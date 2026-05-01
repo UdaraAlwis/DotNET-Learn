@@ -13,7 +13,7 @@ namespace FirstGrpc.Services
 
             var response = new Response
             {
-                Message = request.Content + ", I got your message!"
+                Message = $"{request.Content}, I got your message! {context.Host}"
             };
             return Task.FromResult(response);
         }

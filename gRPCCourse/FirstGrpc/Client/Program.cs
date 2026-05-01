@@ -1,17 +1,42 @@
 ﻿using Basics;
 using Grpc.Core;
 using Grpc.Net.Client;
+using Grpc.Net.Client.Balancer;
+using Grpc.Net.Client.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 Console.WriteLine("Hello, World!");
 
-var options = new GrpcChannelOptions
+//var options = new GrpcChannelOptions
+//{
+//};
+
+//using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
+//var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
+
+// Client side Load Balancing
+var factory = new StaticResolverFactory(addr => new[]
 {
+    new BalancerAddress("localhost", 5057),
+    new BalancerAddress("localhost", 5058),
+});
 
-};
+var services = new ServiceCollection();
+services.AddSingleton<ResolverFactory>(factory);
 
-using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
+var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
+{
+    Credentials = ChannelCredentials.Insecure,
+    ServiceConfig = new ServiceConfig
+    {
+        LoadBalancingConfigs = { new RoundRobinConfig() }
+    },
+    ServiceProvider = services.BuildServiceProvider()
+});
+
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 
+// Call the Grpc method you want to test here
 Unary(client);
 // ClientStreaming(client);
 // ServerStreaming(client);
@@ -21,6 +46,7 @@ Console.ReadLine();
 
 void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
 {
+    // Enable compression for this request
     var metadata = new Metadata { { "grpc-accept-encoding", "gzip" } };
 
     var request = new Request() { Content = "Hello" };
