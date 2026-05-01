@@ -1,9 +1,13 @@
+using FirstGrpc.Interceptors;
 using FirstGrpc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(option =>
+{
+    option.Interceptors.Add<ServerLoggingInterceptor>();
+});
 
 var app = builder.Build();
 

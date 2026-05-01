@@ -483,6 +483,103 @@ catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
 
 ![Handling Metadata, Trailers and Status Codes](./Screenshots/5%20Handling%20metadata%20and%20trailers%20and%20status%20codes.jpg)
 
+## Interceptors
+
+Interceptors in gRPC allows you to intercept and modify gRPC calls on both the client and server sides. 
+They can be used for various purposes, such as logging, authentication, error handling, and more.
+
+We can attach several interceptors to a gRPC channel, and they will be executed in the order they were added.
+
+Client Interceptors,
+- BlockingUnaryInterceptor: Intercept unary calls and block them based on certain conditions, such as authentication or rate limiting.
+- AsyncUnaryInterceptor: Intercept unary calls and perform asynchronous operations, such as logging or modifying the request/response.
+- AsyncClientStreamingInterceptor: Intercept client streaming calls and perform asynchronous operations on the request stream.
+- AsyncServerStreamingInterceptor: Intercept server streaming calls and perform asynchronous operations on the response stream.
+- AsyncDuplexStreamingInterceptor: Intercept bidirectional streaming calls and perform asynchronous operations on both the request and response streams.
+
+On the Client side, you can create an interceptor by inheriting from the `Interceptor` class and overriding the appropriate methods for the type of calls you want to intercept.
+For example,
+```csharp
+public class ClientLoggerInterceptor : Interceptor
+{
+    ... // You can inject dependencies like ILogger here
+
+    public override TResponse BlockingUnaryCall<TRequest, TResponse>(
+        TRequest request, 
+        ClientInterceptorContext<TRequest, TResponse> context, 
+        BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
+    {
+        try
+        {
+            _logger.LogInformation($"Starting the client call fo type: {context.Method.FullName}, {context.Method.Type}");
+            return continuation(request, context);
+        }
+        catch (Exception ex)
+        {
+            ... // Log the exception
+        }
+    }
+}
+```
+
+Then you can add the interceptor to the gRPC client configuration in the `Program.cs` file. For example:
+```csharp
+...
+builder.Services.AddTransient<ClientLoggerInterceptor>();
+
+builder.Services.AddGrpcClient<FirstServiceDefinition.FirstServiceDefinitionClient>(options =>
+{
+    options.Address = new Uri("https://localhost:7157");
+}).AddInterceptor<ClientLoggerInterceptor>();
+...
+```
+
+Server Interceptors,
+- UnaryServerInterceptor: Intercept unary calls and perform operations before and after the call is handled by the server method.
+- ClientStreamingServerInterceptor: Intercept client streaming calls and perform operations on the request stream before and after the call is handled by the server method.
+- ServerStreamingServerInterceptor: Intercept server streaming calls and perform operations on the response stream before and after the call is handled by the server method.
+- DuplexStreamingServerInterceptor: Intercept bidirectional streaming calls and perform operations on both the request and response streams before and after the call is handled by the server method.
+
+On the server side, you can create an interceptor by inheriting from the `Interceptor` class and overriding the appropriate methods for the type of calls you want to intercept. For example:
+```csharp
+public class ServerLoggingInterceptor : Interceptor
+{
+    ... // You can inject dependencies like ILogger here
+
+    public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
+        TRequest request, 
+        ServerCallContext context, 
+        UnaryServerMethod<TRequest, TResponse> continuation)
+    {
+        try
+        {
+            _logger.LogInformation($"Server Intercepting here!");
+            return await continuation( request, context );
+        }
+        catch (Exception ex)
+        {
+            ... // Log the exception
+        }
+    }
+}
+```
+
+Then you can add the interceptor to the gRPC server configuration in the `Program.cs` file. For example:
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddGrpc(option =>
+{
+    option.Interceptors.Add<ServerLoggingInterceptor>();
+});
+
+...
+```
+
+![Client and Server Interceptors](./Screenshots/6%20Client%20and%20Server%20Interceptors.jpg)
+
+
 
 TBC!
 
