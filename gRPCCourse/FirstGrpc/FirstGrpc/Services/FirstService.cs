@@ -9,7 +9,7 @@ namespace FirstGrpc.Services
         {
             var response = new Response
             {
-                Message = request.Content + " from server"
+                Message = request.Content + ", I got your message!"
             };
             return Task.FromResult(response);
         }
@@ -19,7 +19,7 @@ namespace FirstGrpc.Services
             while (await requestStream.MoveNext())
             {
                 var requestPayload = requestStream.Current;
-                Console.WriteLine($"Received from Client: {requestPayload}");
+                Console.WriteLine($"Received from Client: { requestPayload }");
             }
 
             var response = new Response
@@ -34,6 +34,11 @@ namespace FirstGrpc.Services
         {
             for (int i = 0; i < 100; i++)
             {
+                if (context.CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 var response = new Response() { Message = i.ToString() };
                 await responseStream.WriteAsync(response);
             }
@@ -49,7 +54,7 @@ namespace FirstGrpc.Services
             while (await requestStream.MoveNext())
             {
                 var requestPayload = requestStream.Current;
-                response.Message = requestPayload.ToString();
+                response.Message = $"Received from Client: { requestPayload.ToString() }";
                 await responseStream.WriteAsync(response);
             }
         }

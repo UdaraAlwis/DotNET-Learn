@@ -289,7 +289,7 @@ app.Run();
 
 ![First Grpc Service demo](./Screenshots/1%20FirstGrpc%20Service.jpg)
 
-### Create a gRPC client
+### Create a gRPC Client
 
 To create a gRPC client, you can create a new console application called `Client` project in the same Solution level in Visual Studio.
 
@@ -344,6 +344,68 @@ void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
 ```
 
 ![Running Client for Grpc Service](./Screenshots/3%20Running%20Client%20with%20for%20Grpc%20Service.jpg)
+
+### Deadlines and Cancellation
+
+Deadline: Specify how long the client is willing to wait for a response from the server before time out. This can be done by setting a  `deadline ` on the gRPC call. For example:
+```csharp
+var request = new Request() { Content = "Hello" };
+var response = client.Unary(request, deadline: DateTime.UtcNow.AddMilliseconds(3));
+```
+
+Cancellation: Allow the client to cancel an ongoing gRPC call if it is no longer needed or if it is taking too long. This can be done using a `CancellationToken` that is passed to the gRPC call. For example:
+```csharp
+var cancellationToken = new CancellationTokenSource();
+using var streamingCall = client.ServerStream(new Request() { Content = "Hello" });
+
+await foreach (var response in streamingCall.ResponseStream.ReadAllAsync(cancellationToken.Token))
+{
+    ...
+}
+```
+
+but make sure to handle the cancellation on the server side, by checking the `CancellationToken` in the `ServerCallContext` and gracefully terminating the call if cancellation is requested. For example:
+```csharp
+public override async Task ServerStream(Request request, IServerStreamWriter<Response> responseStream, ServerCallContext context)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        if(context.CancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        ... // Send response to client
+    }
+}
+```
+
+### Create a MVC gRPC Client
+
+Add the GRPC client the same way as before, by adding the reference to the gRPC service project and importing the `.proto` file in the MVC project.
+
+Then in the `Program.cs` file of the MVC project, you can create a gRPC channel and register the gRPC client in the dependency injection container. For example:
+```csharp
+builder.Services.AddGrpcClient<FirstServiceDefinition.FirstServiceDefinitionClient>(options =>
+{
+    options.Address = new Uri("https://localhost:7157");
+});
+```
+
+Then you can inject the gRPC client into your MVC controllers and use it to call the gRPC service methods. For example:
+```csharp
+public class HomeController (FirstServiceDefinition.FirstServiceDefinitionClient client) : Controller
+{
+    public IActionResult Index()
+    {
+        var firstCall = client.Unary(new Request { Content = "Hello from MVC Client!" });
+
+        return View();
+    }
+}
+```
+
+![Connect MVC Client app for Grpc Service](./Screenshots/4%20Connect%20MVC%20Client%20app%20for%20Grpc%20Service.jpg)
 
 
 TBC!
