@@ -622,15 +622,58 @@ public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase
 
 We can configure client-side load balancing in gRPC by providing a list of server addresses to the gRPC channel and using a load balancing policy to distribute requests across those servers.
 
+Imaging we have two instances of the gRPC server running on different ports, for example, one on `localhost:5057` and another on `localhost:5058`. We can create a custom resolver factory that returns these addresses to the gRPC channel. For example:
+```csharp
+// Client side Load Balancing
+var factory = new StaticResolverFactory(addr => new[]
+{
+    new BalancerAddress("localhost", 5057),
+    new BalancerAddress("localhost", 5058),
+});
 
+// Create a service collection and register the resolver factory
+var services = new ServiceCollection();
+services.AddSingleton<ResolverFactory>(factory);
 
-Testing, spin up two instances of the gRPC server on different ports, for example:
+// Create the gRPC channel with the custom resolver and load balancing configuration
+var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
+{
+    Credentials = ChannelCredentials.Insecure,
+    ServiceConfig = new ServiceConfig
+    {
+        // Configure the load balancing policy to use round-robin load balancing method
+        LoadBalancingConfigs = { new RoundRobinConfig() }
+    },
+    ServiceProvider = services.BuildServiceProvider()
+});
 
+// Create the gRPC client using the channel
+var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
+```
+
+Then in the server side you can access `context.Host` and return it in the response message to verify that the requests are being distributed across both server instances. For example:
+```csharp
+public override Task<Response> Unary(Request request, ServerCallContext context)
+{
+    ...
+    var response = new Response
+    {
+        Message = $"{request.Content}, I got your message! {context.Host}"
+    };
+    return Task.FromResult(response);
+}
+```
+
+So now to test this client-side load balancing configuration, we can run two instances of the gRPC server on different ports, for example:
+```bash
 dotnet run --urls="http://localhost:5057"
 dotnet run --urls="http://localhost:5058"
+```
+
+Then when we make gRPC calls using the client, the requests will be distributed across both server instances according to the round-robin load balancing policy. 
+You can verify this by checking the response messages that the client receives, which should indicate which server instance handled each request based on the `context.Host` value included in the response message.
 
 ![Client Side Load Balancing](./Screenshots/8%20Client%20Side%20Load%20Balancing.jpg)
-
 
 
 

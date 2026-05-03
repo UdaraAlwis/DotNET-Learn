@@ -21,19 +21,23 @@ var factory = new StaticResolverFactory(addr => new[]
     new BalancerAddress("localhost", 5058),
 });
 
+// Create a service collection and register the resolver factory
 var services = new ServiceCollection();
 services.AddSingleton<ResolverFactory>(factory);
 
+// Create the gRPC channel with the custom resolver and load balancing configuration
 var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
 {
     Credentials = ChannelCredentials.Insecure,
     ServiceConfig = new ServiceConfig
     {
+        // Configure the load balancing policy to use round-robin load balancing method
         LoadBalancingConfigs = { new RoundRobinConfig() }
     },
     ServiceProvider = services.BuildServiceProvider()
 });
 
+// Create the gRPC client using the channel
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 
 // Call the Grpc method you want to test here
