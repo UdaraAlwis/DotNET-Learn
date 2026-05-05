@@ -673,8 +673,66 @@ dotnet run --urls="http://localhost:5058"
 Then when we make gRPC calls using the client, the requests will be distributed across both server instances according to the round-robin load balancing policy. 
 You can verify this by checking the response messages that the client receives, which should indicate which server instance handled each request based on the `context.Host` value included in the response message.
 
-![Client Side Load Balancing](./Screenshots/8%20Client%20Side%20Load%20Balancing.jpg)
+![Client Side Load Balancing](./Screenshots/8%20Client%20side%20load%20balancing.jpg)
 
+## Transient Fault handling
+
+Temporary faults or network glitches can occur in distributed systems, and gRPC provides mechanisms for handling these transient faults gracefully.
+
+Retry Policies: Automatically retry failed gRPC calls on the client for specific transient errors (for example, selected status codes).
+
+Hedging Policies: Send the same request to multiple servers in parallel, use the first successful response, and cancel the rest.
+
+### Retry Policy
+
+You can configure a retry policy for gRPC calls on the client side by setting the `ServiceConfig` property in the `GrpcChannelOptions`. For example:
+```csharp
+var retryPolicy = new MethodConfig
+{
+    Names = { MethodName.Default },
+    RetryPolicy = new RetryPolicy
+    {
+        MaxAttempts = 5,
+        BackoffMultiplier = 1,
+        InitialBackoff = TimeSpan.FromSeconds(0.5),
+        MaxBackoff = TimeSpan.FromSeconds(0.5),
+        RetryableStatusCodes = { StatusCode.Internal }
+    }
+};
+
+var options = new GrpcChannelOptions
+{
+    ServiceConfig = new ServiceConfig
+    {
+        MethodConfigs = { retryPolicy }
+    }
+};
+
+using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
+```
+
+Then to simulate a transient fault on the server side, you can throw an `RpcException` with a status code that is included in the `RetryableStatusCodes` of the retry policy. 
+For example:
+```csharp
+public override Task<Response> Unary(Request request, ServerCallContext context)
+{
+    // For Testing, to check if this is the first attempt of the RPC call
+    // The "grpc-previous-rpc-attempts" header is added by gRPC client when it retries a call
+    if (!context.RequestHeaders.Where(x => x.Key == "grpc-previous-rpc-attempts").Any())
+    {
+        // This is the first attempt of the RPC call
+        throw new RpcException(new Status(StatusCode.Internal, "This is the first attempt, please retry!"));
+    }
+
+    ... // Handle unary logic here
+}
+```
+
+You can see during debug the `grpc-previous-rpc-attempts` value keeps increasing with each retry attempt.
+
+![Retry Policy Demo](./Screenshots/9%20Client%20side%20retry%20policy.jpg)
+
+### Hedging Policy
 
 
 TBC!

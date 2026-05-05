@@ -7,38 +7,55 @@ using Microsoft.Extensions.DependencyInjection;
 
 Console.WriteLine("Hello, World!");
 
-//var options = new GrpcChannelOptions
-//{
-//};
-
-//using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
-//var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
-
-// Client side Load Balancing
-var factory = new StaticResolverFactory(addr => new[]
+var retryPolicy = new MethodConfig
 {
-    new BalancerAddress("localhost", 5057),
-    new BalancerAddress("localhost", 5058),
-});
+    Names = { MethodName.Default },
+    RetryPolicy = new RetryPolicy
+    {
+        MaxAttempts = 5,
+        BackoffMultiplier = 1,
+        InitialBackoff = TimeSpan.FromSeconds(0.5),
+        MaxBackoff = TimeSpan.FromSeconds(0.5),
+        RetryableStatusCodes = { StatusCode.Internal }
+    }
+};
 
-// Create a service collection and register the resolver factory
-var services = new ServiceCollection();
-services.AddSingleton<ResolverFactory>(factory);
-
-// Create the gRPC channel with the custom resolver and load balancing configuration
-var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
+var options = new GrpcChannelOptions
 {
-    Credentials = ChannelCredentials.Insecure,
     ServiceConfig = new ServiceConfig
     {
-        // Configure the load balancing policy to use round-robin load balancing method
-        LoadBalancingConfigs = { new RoundRobinConfig() }
-    },
-    ServiceProvider = services.BuildServiceProvider()
-});
+        MethodConfigs = { retryPolicy }
+    }
+};
 
-// Create the gRPC client using the channel
+using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
+
+//// Client side Load Balancing
+//var factory = new StaticResolverFactory(addr => new[]
+//{
+//    new BalancerAddress("localhost", 5057),
+//    new BalancerAddress("localhost", 5058),
+//});
+
+//// Create a service collection and register the resolver factory
+//var services = new ServiceCollection();
+//services.AddSingleton<ResolverFactory>(factory);
+
+//// Create the gRPC channel with the custom resolver and load balancing configuration
+//var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
+//{
+//    Credentials = ChannelCredentials.Insecure,
+//    ServiceConfig = new ServiceConfig
+//    {
+//        // Configure the load balancing policy to use round-robin load balancing method
+//        LoadBalancingConfigs = { new RoundRobinConfig() }
+//    },
+//    ServiceProvider = services.BuildServiceProvider()
+//});
+
+//// Create the gRPC client using the channel
+//var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 
 // Call the Grpc method you want to test here
 Unary(client);
@@ -54,7 +71,9 @@ void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
     var metadata = new Metadata { { "grpc-accept-encoding", "gzip" } };
 
     var request = new Request() { Content = "Hello" };
-    var response = client.Unary(request, deadline: DateTime.UtcNow.AddSeconds(3), headers: metadata);
+    //// The deadline is set to 3 seconds to trigger the retry policy configured in the GrpcChannelOptions.
+    //var response = client.Unary(request, deadline: DateTime.UtcNow.AddSeconds(3), headers: metadata);
+    var response = client.Unary(request, headers: metadata);
     Console.WriteLine($"Response from Server: {response}");
 }
 

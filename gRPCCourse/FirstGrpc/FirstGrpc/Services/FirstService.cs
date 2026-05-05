@@ -7,6 +7,14 @@ namespace FirstGrpc.Services
     {
         public override Task<Response> Unary(Request request, ServerCallContext context)
         {
+            // For Testing, to check if this is the first attempt of the RPC call
+            // The "grpc-previous-rpc-attempts" header is added by gRPC client when it retries a call
+            if (!context.RequestHeaders.Where(x => x.Key == "grpc-previous-rpc-attempts").Any())
+            {
+                // This is the first attempt of the RPC call
+                throw new RpcException(new Status(StatusCode.Internal, "This is the first attempt, please retry!"));
+            }
+
             // To disable compression for this response,
             // we can set the WriteOptions in the ServerCallContext to NoCompress.
             context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
