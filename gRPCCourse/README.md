@@ -734,6 +734,33 @@ You can see during debug the `grpc-previous-rpc-attempts` value keeps increasing
 
 ### Hedging Policy
 
+You can configure a hedging policy for gRPC calls on the client side by setting the `ServiceConfig` property in the `GrpcChannelOptions`. For example:
+```csharp
+var hedgingPolicy = new MethodConfig
+{
+    Names = { MethodName.Default },
+    HedgingPolicy = new HedgingPolicy
+    {
+        MaxAttempts = 5,
+        NonFatalStatusCodes = { StatusCode.Internal },
+        HedgingDelay = TimeSpan.FromSeconds(0.5),
+    }
+};
+
+var options = new GrpcChannelOptions
+{
+    ServiceConfig = new ServiceConfig
+    {
+        MethodConfigs = { hedgingPolicy }
+    }
+};
+
+using var channel = GrpcChannel.ForAddress("https://localhost:7157", options);
+```
+
+You can see during the debug that multiple requests are being sent to the server in parallel, and the client will use the first successful response it receives while canceling the rest.
+
+![Hedging Policy Demo](./Screenshots/10%20Client%20side%20hedging%20policy.jpg)
 
 TBC!
 
