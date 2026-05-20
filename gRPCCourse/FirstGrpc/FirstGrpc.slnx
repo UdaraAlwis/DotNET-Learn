@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Client/Client.csproj" />
+  <Project Path="FirstGrpc.Tests.Integration/FirstGrpc.Tests.Integration.csproj" Id="ecb37d6b-a5ab-470f-8407-cc7c4cba70e9" />
   <Project Path="FirstGrpc.Tests.Unit/FirstGrpc.Tests.Unit.csproj" Id="4379d105-6998-4bf0-a152-0ff5567c3595" />
   <Project Path="FirstGrpc/FirstGrpc.csproj" />
   <Project Path="MvcClient/MvcClient.csproj" Id="88929de6-42ac-4448-9fc6-2d46cbefc589" />

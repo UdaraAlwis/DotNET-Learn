@@ -858,6 +858,95 @@ public class FirstServiceTests
 
 ### Integration Tests
 
+For this demo, we use xUnit for testing and FluentAssertions for readable assertions.
+
+Create the test project as `FirstGrpc.Tests.Integration` and add a project reference to the gRPC service project.
+
+Then open `FirstGrpc.Tests.Integration.csproj` and add a proto reference so the test project can generate the gRPC client code:
+```xml
+<ItemGroup>
+    <Protobuf Include="..\FirstGrpc\Protos\first.proto" GrpcServices="Client">
+        <Link>Protos\first.proto</Link>
+    </Protobuf>
+</ItemGroup>
+```
+
+Then install package, `Microsoft.AspNetCore.Mvc.Testing`, to use the `WebApplicationFactory<TProgram>` class, which provides a test server and client for integration testing of ASP.NET Core applications.
+
+Create a factory class that inherits from `WebApplicationFactory<TProgram>` to configure the in-memory test server:
+```csharp
+public class MyFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Test");
+        builder.ConfigureTestServices(services =>
+        {
+            // You can add additional services or override
+            // existing ones here if needed for testing
+        });
+        builder.UseTestServer();
+    }
+}
+```
+
+Install these client-related packages in the integration test project:
+- `Google.Protobuf`
+- `Grpc.Net.ClientFactory`
+- `Grpc.Tools` (generates gRPC client code from the proto file)
+
+![Integration Test Set up and configuration](./Screenshots/12%20Integration%20Test%20Set%20up%20and%20configuration.jpg)
+
+Then in the same MyFactory class, we can create a method to create a gRPC client that connects to the in-memory test server. For example:
+```csharp
+public class MyFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+{
+    ...
+
+    public FirstServiceDefinition.FirstServiceDefinitionClient CreateGrpcClient()
+    {
+        var httpClient = CreateDefaultClient();
+        var channel = GrpcChannel.ForAddress(httpClient.BaseAddress!, new GrpcChannelOptions
+        {
+            HttpClient = httpClient
+        });
+
+        return new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
+    }
+}
+```
+
+Make sure to make the FirstGrpc Program class a partial class so that it can be accessed by the test project. For example:
+```csharp
+public partial class Program { }
+```
+
+Now we can write our integration tests, create a test class called `FirstServiceTests.cs` and inherit from `IClassFixture<MyFactory<Program>>`. For example:
+```csharp
+public class FirstServiceTests : IClassFixture<MyFactory<Program>>
+{
+    ... // Init factory and other setup
+
+    [Fact]
+    public void GetUnaryMessage()
+    {
+        // Arrange
+        var client = _factory.CreateGrpcClient();
+        var expectedResponse = new Response
+        {
+            Message = "Hello this is Server, I got your message!"
+        };
+
+        // Act
+        var actualResponse = client.Unary(new Request { Content = "Hello, Server!" });
+
+        // Assert
+        Assert.Equal(expectedResponse.Message, actualResponse.Message);
+    }
+}
+```
+
+![Integration Testing gRPC Services](./Screenshots/13%20Integration%20Tests%20for%20gRPC.jpg)
 
 
 TBC!
