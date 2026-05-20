@@ -762,6 +762,104 @@ You can see during the debug that multiple requests are being sent to the server
 
 ![Hedging Policy Demo](./Screenshots/10%20Client%20side%20hedging%20policy.jpg)
 
+## Writing Tests for gRPC Services
+
+### Unit Tests
+
+As for this demo, we will use xUnit and use FluentAssertions for better readability of our assertions.
+
+Create a the test project as `FirstGrpc.Tests.Unit` and add the reference to the gRPC service project.
+
+Then we need to mock the implementation of the `ServerCallContext`. For example:
+```csharp
+public class TestServerCallContext : ServerCallContext
+{
+    private readonly Metadata requestHeaders;
+    private readonly CancellationToken cancellationToken;
+
+    private TestServerCallContext(Metadata requestHeaders, CancellationToken cancellationToken)
+    {
+        this.requestHeaders = requestHeaders;
+        this.cancellationToken = cancellationToken;
+    }
+
+    protected override string MethodCore => "MethodName";
+
+    protected override string HostCore => "HostName";
+
+    protected override string PeerCore => "PeerName";
+
+    protected override DateTime DeadlineCore { get; }
+
+    ... // Implement other abstract members of ServerCallContext as needed
+```
+
+We need an interface of our gRPC service to be used in the tests. 
+So we generate an interface for the `FirstService` gRPC service, for example:
+```csharp
+public interface IFirstService
+{        
+    Task<Response> Unary(Request request, ServerCallContext context);
+    ... // Other method signatures
+}
+```
+
+Then we make sure our  `FirstService` implements the `IFirstService` interface. For example:
+```csharp
+public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase, IFirstService
+{
+
+    public override Task<Response> Unary(Request request, ServerCallContext context)
+    {
+        ... // Handle unary logic here
+    }
+
+    ... // Implement other methods
+}
+```
+
+Now we can write unit tests for the `FirstService` by mocking the `ServerCallContext` and testing the logic of each method. For example:
+```csharp
+public class FirstServiceTests
+{
+    private readonly IFirstService _firstService;
+
+    public FirstServiceTests()
+    {
+        _firstService = new FirstService();
+    }
+
+    [Fact]
+    public async Task Unary_Should_Return_Response_With_Expected_Message()
+    {
+        // Arrange
+        var request = new Request
+        {
+            Content = "Hello, Server!"
+        };
+
+        var callContext = TestServerCallContext.Create();
+
+        var expectedResponse = new Response
+        {
+            Message = "Hello this is Server, I got your message!"
+        };
+
+        // Act
+        var actualResponse = await _firstService.Unary(request, callContext);
+
+        // Assert
+        actualResponse.Should().BeEquivalentTo(expectedResponse);
+    }
+}
+```
+
+![Unit Testing gRPC Services](./Screenshots/11%20Unit%20Tests%20for%20gRPC.jpg)
+
+### Integration Tests
+
+
+
 TBC!
 
 Learning on going...
